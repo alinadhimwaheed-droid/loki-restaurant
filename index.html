@@ -920,13 +920,23 @@ body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; 
     </div>
     <div id="adminTab-promo" style="display:none">
       <div id="promoCodesList"></div>
-      <div style="background:var(--dark3);border:1px solid var(--border);border-radius:20px;padding:20px;margin-top:16px;">
-        <div style="font-size:16px;font-weight:700;margin-bottom:16px;">➕ <span data-ar="إضافة كود خصم جديد" data-en="Add New Promo Code">إضافة كود خصم جديد</span></div>
+      <div style="background:var(--dark3);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:20px;margin-top:16px;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold);">➕ <span data-ar="إضافة كود خصم جديد" data-en="Add New Promo Code">إضافة كود خصم جديد</span></div>
         <div style="display:grid;gap:12px;">
-          <input type="text" id="newPromoCode" class="form-input" placeholder="الكود (مثال: LOKI20)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
-          <input type="number" id="newPromoDiscount" class="form-input" placeholder="نسبة الخصم %" min="1" max="100">
-          <input type="text" id="newPromoDesc" class="form-input" placeholder="وصف (مثال: خصم رمضان)">
-          <button class="btn-confirm" onclick="createPromoCode()"><span data-ar="إضافة الكود" data-en="Add Code">إضافة الكود</span></button>
+          <input type="text" id="newPromoCode" class="form-input" placeholder="الكود (مثال: LOKI20)" style="text-transform:uppercase;color:var(--gold);font-weight:800;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
+          <input type="number" id="newPromoDiscount" class="form-input" placeholder="نسبة الخصم %" min="1" max="100" style="color:var(--gold);">
+          <input type="text" id="newPromoDesc" class="form-input" placeholder="وصف (مثال: خصم رمضان)" style="color:var(--gold);">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;" data-ar="عدد مرات الاستخدام (0 = لا محدود)" data-en="Max uses (0 = unlimited)">عدد مرات الاستخدام (0 = لا محدود)</label>
+              <input type="number" id="newPromoMaxUses" class="form-input" placeholder="0" min="0" value="0" style="color:var(--gold);">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;" data-ar="تاريخ الانتهاء (اختياري)" data-en="Expiry date (optional)">تاريخ الانتهاء</label>
+              <input type="date" id="newPromoExpiry" class="form-input" style="color:var(--gold);colorscheme:dark;">
+            </div>
+          </div>
+          <button class="btn-confirm" onclick="createPromoCode()"><span data-ar="➕ إضافة الكود" data-en="➕ Add Code">➕ إضافة الكود</span></button>
         </div>
       </div>
     </div>
@@ -1794,15 +1804,16 @@ async function loadAdminCodes() {
       <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
         <div class="code-value">${c.code}</div>
         <span class="code-status ${c.used ? 'code-used' : 'code-available'}">
-          ${c.used ? t('مستخدم','Used') : t('متاح','Available')}
+          <span data-ar="${c.used ? 'مستخدم' : 'متاح'}" data-en="${c.used ? 'Used' : 'Available'}">${c.used ? 'مستخدم' : 'متاح'}</span>
         </span>
       </div>
       <div style="display:flex;gap:8px;align-items:center;width:100%;">
-        <input class="code-name-input" id="name-${c.id}" placeholder="${t('اسم النادل','Waiter name')}" value="${c.waiter_name||''}" maxlength="30">
-        <button class="btn-save-name" onclick="saveCodeName('${c.id}')">${t('حفظ','Save')}</button>
+        <input class="code-name-input" id="name-${c.id}" data-ar-placeholder="اسم النادل" data-en-placeholder="Waiter name" placeholder="اسم النادل" value="${c.waiter_name||''}" maxlength="30">
+        <button class="btn-save-name" onclick="saveCodeName('${c.id}')"><span data-ar="حفظ" data-en="Save">حفظ</span></button>
       </div>
       ${c.waiter_name ? `<div style="font-size:12px;color:var(--gold)">👤 ${c.waiter_name}</div>` : ''}
     </div>`).join('');
+  setLang(currentLang);
 }
 
 async function saveCodeName(id) {
@@ -2103,32 +2114,49 @@ async function loadPromoCodes() {
     container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px">${t('لا توجد أكواد خصم','No promo codes')}</div>`;
     return;
   }
-  container.innerHTML = data.map(p => `
-    <div class="discount-active-card">
-      <div style="background:rgba(212,175,55,0.1);border:1px solid var(--gold);border-radius:10px;padding:6px 16px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold)">${p.code}</div>
-      <div class="discount-info">
-        <div class="discount-info-title">${t('خصم','Discount')}: <span style="color:var(--gold)">${p.discount}%</span></div>
-        ${p.description ? `<div class="discount-info-reason">📝 ${p.description}</div>` : ''}
-        <div style="font-size:11px;color:${p.active?'var(--green)':'var(--red)'};margin-top:4px;font-weight:700">
-          ${p.active ? '✅ '+t('فعّال','Active') : '❌ '+t('معطّل','Inactive')}
+  const now = new Date();
+  container.innerHTML = data.map(p => {
+    const expired = p.expires_at && new Date(p.expires_at) < now;
+    const maxReached = p.max_uses > 0 && p.uses_count >= p.max_uses;
+    const isActive = p.active && !expired && !maxReached;
+    const statusColor = isActive ? 'var(--green)' : 'var(--red)';
+    const statusText = expired ? '⏰ '+t('منتهي الصلاحية','Expired') :
+                       maxReached ? '🔒 '+t('استُنفد','Max reached') :
+                       isActive ? '✅ '+t('فعّال','Active') : '❌ '+t('معطّل','Inactive');
+    return `
+    <div style="background:var(--dark3);border:1px solid ${isActive?'rgba(212,175,55,0.4)':'var(--border)'};border-radius:16px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--gold)">${p.code}</div>
+          <div style="font-size:13px;margin-top:4px;">🏷️ ${t('خصم','Discount')}: <span style="color:var(--gold);font-weight:800;">${p.discount}%</span></div>
+          ${p.description ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">📝 ${p.description}</div>` : ''}
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+            <div style="font-size:12px;color:var(--muted);">🔢 ${t('الاستخدام','Uses')}: <span style="color:var(--text);font-weight:700;">${p.uses_count||0}${p.max_uses>0?' / '+p.max_uses:' / ∞'}</span></div>
+            ${p.expires_at ? `<div style="font-size:12px;color:var(--muted);">📅 ${t('ينتهي','Expires')}: <span style="color:${expired?'var(--red)':'var(--text)'};font-weight:700;">${new Date(p.expires_at).toLocaleDateString('ar-IQ')}</span></div>` : ''}
+          </div>
+          <div style="font-size:11px;color:${statusColor};margin-top:6px;font-weight:700;">${statusText}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button onclick="togglePromoCode('${p.id}',${p.active})" style="background:${p.active?'rgba(192,57,43,0.2)':'rgba(39,174,96,0.2)'};color:${p.active?'var(--red)':'var(--green)'};border:1px solid ${p.active?'var(--red)':'var(--green)'};border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">
+            ${p.active ? t('⛔ تعطيل','⛔ Disable') : t('✅ تفعيل','✅ Enable')}
+          </button>
+          <button onclick="deletePromoCode('${p.id}')" style="background:rgba(192,57,43,0.15);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">🗑️ ${t('حذف','Delete')}</button>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <button class="promo-btn" onclick="togglePromoCode('${p.id}',${p.active})" style="background:${p.active?'rgba(192,57,43,0.2)':'rgba(39,174,96,0.2)'};color:${p.active?'var(--red)':'var(--green)'};border:1px solid ${p.active?'var(--red)':'var(--green)'};border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">
-          ${p.active ? t('⛔ تعطيل','⛔ Disable') : t('✅ تفعيل','✅ Enable')}
-        </button>
-        <button class="discount-remove-btn" onclick="deletePromoCode('${p.id}')">🗑️</button>
-      </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function createPromoCode() {
   const code = document.getElementById('newPromoCode').value.trim().toUpperCase();
   const discount = parseInt(document.getElementById('newPromoDiscount').value);
   const description = document.getElementById('newPromoDesc').value.trim();
+  const max_uses = parseInt(document.getElementById('newPromoMaxUses').value) || 0;
+  const expiryVal = document.getElementById('newPromoExpiry').value;
+  const expires_at = expiryVal ? new Date(expiryVal).toISOString() : null;
   if (!code) { showToast(t('أدخل الكود','Enter code'), 'error'); return; }
   if (!discount || discount < 1 || discount > 100) { showToast(t('أدخل نسبة صحيحة 1-100','Enter valid % 1-100'), 'error'); return; }
-  const { error } = await sb.from('promo_codes').insert({ code, discount, description, active: true });
+  const { error } = await sb.from('promo_codes').insert({ code, discount, description, active: true, max_uses, uses_count: 0, expires_at });
   if (error) {
     if (error.code === '23505') showToast(t('هذا الكود موجود مسبقاً','Code already exists'), 'error');
     else showToast(error.message, 'error');
@@ -2138,6 +2166,8 @@ async function createPromoCode() {
   document.getElementById('newPromoCode').value = '';
   document.getElementById('newPromoDiscount').value = '';
   document.getElementById('newPromoDesc').value = '';
+  document.getElementById('newPromoMaxUses').value = '0';
+  document.getElementById('newPromoExpiry').value = '';
   loadPromoCodes();
 }
 
