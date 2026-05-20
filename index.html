@@ -787,7 +787,7 @@ body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; 
     </button>
   </nav>
 </div>
-
+<button class="nav-btn" onclick="openProfile()" style="background:rgba(212,175,55,0.1);color:var(--gold);border:1px solid var(--border);" title="الملف الشخصي">👤</button>
 <!-- ===== ORDERS SUB-PAGE ===== -->
 <div id="orders-page" class="page">
   <nav class="navbar">
@@ -838,6 +838,7 @@ body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; 
     <div id="waiterGrid" class="waiter-grid"></div>
   </div>
 </div>
+  <button class="nav-btn" onclick="openProfile()" style="background:rgba(212,175,55,0.1);color:var(--gold);border:1px solid var(--border);" title="الملف الشخصي">👤</button>
 
 <!-- ===== CART DRAWER ===== -->
 <div class="drawer-overlay" id="cartOverlay" onclick="closeCart()"></div>
@@ -946,6 +947,7 @@ body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; 
         <span data-ar="💾 حفظ التغييرات" data-en="💾 Save Changes">💾 حفظ التغييرات</span>
       </button>
     </div>
+  <button class="nav-btn" onclick="openProfile()" style="background:rgba(212,175,55,0.1);color:var(--gold);border:1px solid var(--border);" title="الملف الشخصي">👤</button>
 
     <!-- بطاقة تغيير كلمة المرور -->
     <div style="background:var(--dark3);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:16px;">
@@ -1012,235 +1014,6 @@ body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; 
     </div>
   </div>
 </div>
- // ============================================================
-// ===== PROFILE PAGE SYSTEM =====
-// ============================================================
-
-let profilePreviousPage = 'customer-page';
-
-function openProfile() {
-  // احفظ الصفحة الحالية للرجوع إليها
-  const pages = ['customer-page','waiter-page','admin-page','orders-page'];
-  for (const p of pages) {
-    if (document.getElementById(p)?.classList.contains('active')) {
-      profilePreviousPage = p;
-      break;
-    }
-  }
-  fillProfileForm();
-  showPage('profile-page');
-  setLang(currentLang);
-}
-
-function goBackFromProfile() {
-  showPage(profilePreviousPage);
-  // إعادة تحميل الصفحة السابقة إذا لزم
-  if (profilePreviousPage === 'customer-page') showSubPage('menu');
-  else if (profilePreviousPage === 'waiter-page') loadWaiterOrders();
-  else if (profilePreviousPage === 'admin-page') showAdminPage();
-}
-
-function fillProfileForm() {
-  if (!currentProfile) return;
-
-  // الاسم والإيميل
-  document.getElementById('editName').value = currentProfile.full_name || '';
-  document.getElementById('editEmail').value = currentUser?.email || '';
-  document.getElementById('editPhone').value = currentProfile.phone || '';
-  document.getElementById('editLocation').value = currentProfile.location || '';
-  document.getElementById('editWebsite').value = currentProfile.website || '';
-
-  // عرض الاسم والإيميل في الأعلى
-  document.getElementById('profileDisplayName').textContent = currentProfile.full_name || '';
-  document.getElementById('profileDisplayEmail').textContent = currentUser?.email || '';
-
-  // نوع الحساب
-  const roleBadge = document.getElementById('profileRoleBadge');
-  const roleMap = {
-    customer: { ar: '🍽️ زبون', en: '🍽️ Customer', color: 'rgba(212,175,55,0.2)', border: 'var(--gold)', text: 'var(--gold)' },
-    waiter:   { ar: '🧑‍🍳 نادل', en: '🧑‍🍳 Waiter',   color: 'rgba(39,174,96,0.2)',  border: 'var(--green)', text: 'var(--green)' },
-    admin:    { ar: '⚙️ مدير',  en: '⚙️ Admin',   color: 'rgba(192,57,43,0.2)',  border: 'var(--red)',  text: 'var(--red)' },
-  };
-  const r = roleMap[currentProfile.role] || roleMap.customer;
-  roleBadge.textContent = currentLang === 'ar' ? r.ar : r.en;
-  roleBadge.style.cssText = display:inline-block;padding:6px 18px;border-radius:50px;font-size:13px;font-weight:700;margin-bottom:8px;background:${r.color};border:1px solid ${r.border};color:${r.text};;
-
-  // الصورة
-  const avatarImg = document.getElementById('profileAvatarImg');
-  const avatarIcon = document.getElementById('profileAvatarIcon');
-  if (currentProfile.avatar_url) {
-    avatarImg.src = currentProfile.avatar_url;
-    avatarImg.style.display = 'block';
-    avatarIcon.style.display = 'none';
-  } else {
-    avatarImg.style.display = 'none';
-    avatarIcon.style.display = 'block';
-  }
-
-  // رابط الخريطة
-  updateLocationMapLink(currentProfile.location || '');
-}
-
-function updateLocationMapLink(val) {
-  const linkDiv = document.getElementById('locationMapLink');
-  const anchor = document.getElementById('locationMapAnchor');
-  if (val && (val.startsWith('http://') || val.startsWith('https://'))) {
-    linkDiv.style.display = 'block';
-    anchor.href = val;
-  } else if (val) {
-    linkDiv.style.display = 'block';
-    anchor.href = 'https://maps.google.com/?q=' + encodeURIComponent(val);
-  } else {
-    linkDiv.style.display = 'none';
-  }
-}
-
-// تحديث رابط الخريطة عند الكتابة
-document.addEventListener('DOMContentLoaded', () => {
-  const locInput = document.getElementById('editLocation');
-  if (locInput) {
-    locInput.addEventListener('input', () => updateLocationMapLink(locInput.value));
-  }
-});
-
-async function saveProfile() {
-  if (!currentUser || !currentProfile) return;
-
-  const full_name = document.getElementById('editName').value.trim();
-  const newEmail   = document.getElementById('editEmail').value.trim();
-  const phone      = document.getElementById('editPhone').value.trim();
-  const location   = document.getElementById('editLocation').value.trim();
-  const website    = document.getElementById('editWebsite').value.trim();
-[5/20/2026 3:50 PM] علي ناظم وحيد: if (!full_name) { showToast(t('أدخل الاسم الكامل', 'Enter full name'), 'error'); return; }
-
-  // تحديث جدول profiles
-  const { error: profileError } = await sb.from('profiles').update({
-    full_name, phone, location, website
-  }).eq('id', currentUser.id);
-
-  if (profileError) {
-    showToast(t('خطأ في الحفظ: ', 'Save error: ') + profileError.message, 'error');
-    return;
-  }
-
-  // تحديث الإيميل إذا تغير
-  if (newEmail && newEmail !== currentUser.email) {
-    const { error: emailError } = await sb.auth.updateUser({ email: newEmail });
-    if (emailError) {
-      showToast(t('خطأ في تحديث الإيميل: ', 'Email update error: ') + emailError.message, 'error');
-      return;
-    }
-    showToast(t('تم الحفظ! تحقق من إيميلك الجديد لتأكيده', 'Saved! Check new email to confirm'), 'success');
-  } else {
-    showToast(t('✅ تم حفظ التغييرات', '✅ Changes saved'), 'success');
-  }
-
-  // تحديث currentProfile محلياً
-  currentProfile.full_name = full_name;
-  currentProfile.phone     = phone;
-  currentProfile.location  = location;
-  currentProfile.website   = website;
-
-  // تحديث العرض
-  document.getElementById('profileDisplayName').textContent = full_name;
-  if (newEmail) document.getElementById('profileDisplayEmail').textContent = newEmail;
-  updateLocationMapLink(location);
-}
-
-async function changePassword() {
-  const newPass     = document.getElementById('editNewPass').value;
-  const confirmPass = document.getElementById('editConfirmPass').value;
-
-  if (!newPass) { showToast(t('أدخل كلمة المرور الجديدة', 'Enter new password'), 'error'); return; }
-  if (newPass.length < 6) { showToast(t('كلمة المرور قصيرة (6 أحرف على الأقل)', 'Password too short (min 6)'), 'error'); return; }
-  if (newPass !== confirmPass) { showToast(t('كلمتا المرور غير متطابقتين', 'Passwords do not match'), 'error'); return; }
-
-  const { error } = await sb.auth.updateUser({ password: newPass });
-  if (error) {
-    showToast(t('خطأ: ', 'Error: ') + error.message, 'error');
-    return;
-  }
-  showToast(t('✅ تم تحديث كلمة المرور', '✅ Password updated'), 'success');
-  document.getElementById('editNewPass').value = '';
-  document.getElementById('editConfirmPass').value = '';
-}
-
-async function handleAvatarUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) {
-    showToast(t('حجم الصورة يجب أن يكون أقل من 2MB', 'Image must be under 2MB'), 'error');
-    return;
-  }
-
-  showToast(t('⏳ جاري رفع الصورة...', '⏳ Uploading...'), 'info');
-
-  const ext = file.name.split('.').pop();
-  const filePath = avatars/${currentUser.id}.${ext};
-
-  const { error: uploadError } = await sb.storage
-    .from('avatars')
-    .upload(filePath, file, { upsert: true, contentType: file.type });
-
-  if (uploadError) {
-    // fallback: عرض الصورة محلياً بدون رفع
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const avatarImg = document.getElementById('profileAvatarImg');
-      const avatarIcon = document.getElementById('profileAvatarIcon');
-      avatarImg.src = e.target.result;
-      avatarImg.style.display = 'block';
-      avatarIcon.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-    showToast(t('تم عرض الصورة محلياً (لا يوجد bucket للتخزين)', 'Image shown locally (no storage bucket)'), 'info');
-    return;
-  }
-
-  const { data: { publicUrl } } = sb.storage.from('avatars').getPublicUrl(filePath);
-
-  await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
-  currentProfile.avatar_url = publicUrl;
-
-  const avatarImg = document.getElementById('profileAvatarImg');
-  const avatarIcon = document.getElementById('profileAvatarIcon');
-  avatarImg.src = publicUrl;
-  avatarImg.style.display = 'block';
-  avatarIcon.style.display = 'none';
-
-  showToast(t('✅ تم رفع الصورة', '✅ Photo uploaded'), 'success');
-}
-
-function confirmDeleteAccount() {
-  document.getElementById('deleteAccountModal').style.display = 'flex';
-  document.getElementById('deleteConfirmInput').value = '';
-}
-
-function closeDeleteModal() {
-  document.getElementById('deleteAccountModal').style.display = 'none';
-}
-    async function deleteAccount() {
-  const val = document.getElementById('deleteConfirmInput').value.trim();
-  if (val !== 'تأكيد' && val.toLowerCase() !== 'confirm') {
-    showToast(t('اكتب "تأكيد" للمتابعة', 'Type "confirm" to proceed'), 'error');
-    return;
-  }
-
-  closeDeleteModal();
-  showToast(t('⏳ جاري حذف الحساب...', '⏳ Deleting account...'), 'info');
-
-  // حذف البيانات من profiles أولاً
-  await sb.from('profiles').delete().eq('id', currentUser.id);
-
-  // تسجيل الخروج (حذف المستخدم من auth يحتاج Admin key — هنا نكتفي بالخروج)
-  await sb.auth.signOut();
-  currentUser = null;
-  currentProfile = null;
-  cart = [];
-
-  showPage('landing');
-  showToast(t('تم حذف الحساب بنجاح', 'Account deleted successfully'), 'success');
-}
     
 <script>
 // ============================================================
@@ -2473,7 +2246,235 @@ async function deletePromoCode(id) {
   showToast(t('تم حذف الكود','Code deleted'), 'success');
   loadPromoCodes();
 }
+// ============================================================
+// ===== PROFILE PAGE SYSTEM =====
+// ============================================================
 
+let profilePreviousPage = 'customer-page';
+
+function openProfile() {
+  // احفظ الصفحة الحالية للرجوع إليها
+  const pages = ['customer-page','waiter-page','admin-page','orders-page'];
+  for (const p of pages) {
+    if (document.getElementById(p)?.classList.contains('active')) {
+      profilePreviousPage = p;
+      break;
+    }
+  }
+  fillProfileForm();
+  showPage('profile-page');
+  setLang(currentLang);
+}
+
+function goBackFromProfile() {
+  showPage(profilePreviousPage);
+  // إعادة تحميل الصفحة السابقة إذا لزم
+  if (profilePreviousPage === 'customer-page') showSubPage('menu');
+  else if (profilePreviousPage === 'waiter-page') loadWaiterOrders();
+  else if (profilePreviousPage === 'admin-page') showAdminPage();
+}
+
+function fillProfileForm() {
+  if (!currentProfile) return;
+
+  // الاسم والإيميل
+  document.getElementById('editName').value = currentProfile.full_name || '';
+  document.getElementById('editEmail').value = currentUser?.email || '';
+  document.getElementById('editPhone').value = currentProfile.phone || '';
+  document.getElementById('editLocation').value = currentProfile.location || '';
+  document.getElementById('editWebsite').value = currentProfile.website || '';
+
+  // عرض الاسم والإيميل في الأعلى
+  document.getElementById('profileDisplayName').textContent = currentProfile.full_name || '';
+  document.getElementById('profileDisplayEmail').textContent = currentUser?.email || '';
+
+  // نوع الحساب
+  const roleBadge = document.getElementById('profileRoleBadge');
+  const roleMap = {
+    customer: { ar: '🍽 زبون', en: '🍽 Customer', color: 'rgba(212,175,55,0.2)', border: 'var(--gold)', text: 'var(--gold)' },
+    waiter:   { ar: '🧑‍🍳 نادل', en: '🧑‍🍳 Waiter',   color: 'rgba(39,174,96,0.2)',  border: 'var(--green)', text: 'var(--green)' },
+    admin:    { ar: '⚙️ مدير',  en: '⚙️ Admin',   color: 'rgba(192,57,43,0.2)',  border: 'var(--red)',  text: 'var(--red)' },
+  };
+  const r = roleMap[currentProfile.role] || roleMap.customer;
+  roleBadge.textContent = currentLang === 'ar' ? r.ar : r.en;
+  roleBadge.style.cssText = display:inline-block;padding:6px 18px;border-radius:50px;font-size:13px;font-weight:700;margin-bottom:8px;background:${r.color};border:1px solid ${r.border};color:${r.text};;
+
+  // الصورة
+  const avatarImg = document.getElementById('profileAvatarImg');
+  const avatarIcon = document.getElementById('profileAvatarIcon');
+  if (currentProfile.avatar_url) {
+    avatarImg.src = currentProfile.avatar_url;
+    avatarImg.style.display = 'block';
+    avatarIcon.style.display = 'none';
+  } else {
+    avatarImg.style.display = 'none';
+    avatarIcon.style.display = 'block';
+  }
+
+  // رابط الخريطة
+  updateLocationMapLink(currentProfile.location || '');
+}
+
+function updateLocationMapLink(val) {
+  const linkDiv = document.getElementById('locationMapLink');
+  const anchor = document.getElementById('locationMapAnchor');
+  if (val && (val.startsWith('http://') || val.startsWith('https://'))) {
+    linkDiv.style.display = 'block';
+    anchor.href = val;
+  } else if (val) {
+    linkDiv.style.display = 'block';
+    anchor.href = 'https://maps.google.com/?q=' + encodeURIComponent(val);
+  } else {
+    linkDiv.style.display = 'none';
+  }
+}
+
+// تحديث رابط الخريطة عند الكتابة
+document.addEventListener('DOMContentLoaded', () => {
+  const locInput = document.getElementById('editLocation');
+  if (locInput) {
+    locInput.addEventListener('input', () => updateLocationMapLink(locInput.value));
+  }
+});
+
+async function saveProfile() {
+  if (!currentUser || !currentProfile) return;
+
+  const full_name = document.getElementById('editName').value.trim();
+  const newEmail   = document.getElementById('editEmail').value.trim();
+  const phone      = document.getElementById('editPhone').value.trim();
+  const location   = document.getElementById('editLocation').value.trim();
+  const website    = document.getElementById('editWebsite').value.trim();
+ if (!full_name) { showToast(t('أدخل الاسم الكامل', 'Enter full name'), 'error'); return; }
+
+  // تحديث جدول profiles
+  const { error: profileError } = await sb.from('profiles').update({
+    full_name, phone, location, website
+  }).eq('id', currentUser.id);
+
+  if (profileError) {
+    showToast(t('خطأ في الحفظ: ', 'Save error: ') + profileError.message, 'error');
+    return;
+  }
+
+  // تحديث الإيميل إذا تغير
+  if (newEmail && newEmail !== currentUser.email) {
+    const { error: emailError } = await sb.auth.updateUser({ email: newEmail });
+    if (emailError) {
+      showToast(t('خطأ في تحديث الإيميل: ', 'Email update error: ') + emailError.message, 'error');
+      return;
+    }
+    showToast(t('تم الحفظ! تحقق من إيميلك الجديد لتأكيده', 'Saved! Check new email to confirm'), 'success');
+  } else {
+    showToast(t('✅ تم حفظ التغييرات', '✅ Changes saved'), 'success');
+  }
+
+  // تحديث currentProfile محلياً
+  currentProfile.full_name = full_name;
+  currentProfile.phone     = phone;
+  currentProfile.location  = location;
+  currentProfile.website   = website;
+
+  // تحديث العرض
+  document.getElementById('profileDisplayName').textContent = full_name;
+  if (newEmail) document.getElementById('profileDisplayEmail').textContent = newEmail;
+  updateLocationMapLink(location);
+}
+
+async function changePassword() {
+  const newPass     = document.getElementById('editNewPass').value;
+  const confirmPass = document.getElementById('editConfirmPass').value;
+
+  if (!newPass) { showToast(t('أدخل كلمة المرور الجديدة', 'Enter new password'), 'error'); return; }
+  if (newPass.length < 6) { showToast(t('كلمة المرور قصيرة (6 أحرف على الأقل)', 'Password too short (min 6)'), 'error'); return; }
+  if (newPass !== confirmPass) { showToast(t('كلمتا المرور غير متطابقتين', 'Passwords do not match'), 'error'); return; }
+
+  const { error } = await sb.auth.updateUser({ password: newPass });
+  if (error) {
+    showToast(t('خطأ: ', 'Error: ') + error.message, 'error');
+    return;
+  }
+  showToast(t('✅ تم تحديث كلمة المرور', '✅ Password updated'), 'success');
+  document.getElementById('editNewPass').value = '';
+  document.getElementById('editConfirmPass').value = '';
+}
+
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    showToast(t('حجم الصورة يجب أن يكون أقل من 2MB', 'Image must be under 2MB'), 'error');
+    return;
+  }
+
+  showToast(t('⏳ جاري رفع الصورة...', '⏳ Uploading...'), 'info');
+
+  const ext = file.name.split('.').pop();
+  const filePath = avatars/${currentUser.id}.${ext};
+
+  const { error: uploadError } = await sb.storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true, contentType: file.type });
+
+  if (uploadError) {
+    // fallback: عرض الصورة محلياً بدون رفع
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const avatarImg = document.getElementById('profileAvatarImg');
+      const avatarIcon = document.getElementById('profileAvatarIcon');
+      avatarImg.src = e.target.result;
+      avatarImg.style.display = 'block';
+      avatarIcon.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+    showToast(t('تم عرض الصورة محلياً (لا يوجد bucket للتخزين)', 'Image shown locally (no storage bucket)'), 'info');
+    return;
+  }
+
+  const { data: { publicUrl } } = sb.storage.from('avatars').getPublicUrl(filePath);
+
+  await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+  currentProfile.avatar_url = publicUrl;
+
+  const avatarImg = document.getElementById('profileAvatarImg');
+  const avatarIcon = document.getElementById('profileAvatarIcon');
+  avatarImg.src = publicUrl;
+  avatarImg.style.display = 'block';
+  avatarIcon.style.display = 'none';
+
+  showToast(t('✅ تم رفع الصورة', '✅ Photo uploaded'), 'success');
+}
+
+function confirmDeleteAccount() {
+  document.getElementById('deleteAccountModal').style.display = 'flex';
+  document.getElementById('deleteConfirmInput').value = '';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteAccountModal').style.display = 'none';
+}
+ async function deleteAccount() {
+  const val = document.getElementById('deleteConfirmInput').value.trim();
+  if (val !== 'تأكيد' && val.toLowerCase() !== 'confirm') {
+    showToast(t('اكتب "تأكيد" للمتابعة', 'Type "confirm" to proceed'), 'error');
+    return;
+  }
+
+  closeDeleteModal();
+  showToast(t('⏳ جاري حذف الحساب...', '⏳ Deleting account...'), 'info');
+
+  // حذف البيانات من profiles أولاً
+  await sb.from('profiles').delete().eq('id', currentUser.id);
+
+  // تسجيل الخروج (حذف المستخدم من auth يحتاج Admin key — هنا نكتفي بالخروج)
+  await sb.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  cart = [];
+
+  showPage('landing');
+  showToast(t('تم حذف الحساب بنجاح', 'Account deleted successfully'), 'success');
+}
 </script>
 </body>
 </html>
