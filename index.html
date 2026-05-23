@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOKI Restaurant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --gold: #D4AF37;
+  --gold2: #F0C060;
+  --dark: #0A0A0A;
+  --dark2: #111111;
+  --dark3: #1A1A1A;
+  --dark4: #222222;
+  --red: #C0392B;
+  --green: #27AE60;
+  --text: #F0EDE8;
+  --muted: #888;
+  --border: rgba(212,175,55,0.2);
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ===== LIGHT MODE ===== */
+body.light-mode {
+  --dark: #F5F0E8;
+  --dark2: #EDE8DE;
+  --dark3: #E2DDD0;
+  --dark4: #D5CFC0;
+  --text: #1A1A1A;
+  --muted: #666;
+  --border: rgba(180,140,20,0.25);
+  --shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+body.light-mode { background: var(--dark); color: var(--text); }
+body.light-mode .navbar { background: rgba(245,240,232,0.92); }
+body.light-mode .bottom-nav { background: rgba(245,240,232,0.97); }
+body.light-mode .cart-drawer { background: var(--dark2); }
+body.light-mode .chat-box { background: var(--dark2); }
+body.light-mode #landing { background: linear-gradient(135deg, #F5F0E8 0%, #F0E8D0 50%, #F5F0E8 100%); }
+body.light-mode .landing-card { background: var(--dark3); }
+body.light-mode .form-input { background: var(--dark4); color: var(--text); }
+body.light-mode .profile-field-input { background: var(--dark4); color: var(--text); }
+body.light-mode .search-bar { background: var(--dark3); color: var(--text); }
+body.light-mode .menu-card { background: var(--dark3); }
+body.light-mode .order-card { background: var(--dark3); }
+body.light-mode .waiter-card { background: var(--dark3); }
+body.light-mode .profile-card { background: var(--dark3); }
+body.light-mode .drawer-item { background: var(--dark3); }
+body.light-mode .hero-banner { background: linear-gradient(135deg, #F0E8D0, #F5F0E8); }
+body.light-mode .profile-hero { background: linear-gradient(135deg, #F0E8D0, #F5F0E8); }
+body.light-mode .chat-input { background: var(--dark3); color: var(--text); }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body.ltr { direction: ltr; font-family: 'Outfit', sans-serif; }
+
+/* ===== NOISE OVERLAY ===== */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.4;
+}
+
+/* ===== PAGES ===== */
+.page { display:none; min-height:100vh; position:relative; z-index:1; }
+.page.active { display:block; }
+
+/* ===== LANDING ===== */
+#landing {
+  background: linear-gradient(135deg, #0A0A0A 0%, #1A1000 50%, #0A0A0A 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:40px 20px; gap:32px;
+}
+#landing.active { display:flex; }
+
+.logo-container { position:relative; }
+.logo-glow {
+  position:absolute; inset:-30px;
+  background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+.logo-main {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(80px, 20vw, 160px);
+  letter-spacing: 20px;
+  background: linear-gradient(135deg, #D4AF37, #F0C060, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height:1;
+  position:relative;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(212,175,55,0.4));
+}
+.logo-sub {
+  font-size:14px; letter-spacing:6px; color:var(--gold);
+  text-transform:uppercase; opacity:0.8;
+  font-family: 'Outfit', sans-serif;
+}
+
+.lang-toggle {
+  display:flex; gap:8px; background:var(--dark3);
+  padding:4px; border-radius:50px; border:1px solid var(--border);
+}
+.lang-btn {
+  padding:8px 20px; border-radius:50px; border:none;
+  cursor:pointer; font-family:inherit; font-size:14px; font-weight:600;
+  transition:all 0.3s; color:var(--muted); background:transparent;
+}
+.lang-btn.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark);
+}
+
+.landing-card {
+  background: var(--dark3);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px;
+  width: min(400px, 90vw);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(212,175,55,0.1);
+}
+.landing-title {
+  font-size:28px; font-weight:900; margin-bottom:8px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.landing-sub { color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+.role-cards { display:flex; gap:12px; margin-bottom:24px; }
+.role-card {
+  flex:1; padding:16px 12px; border-radius:16px;
+  border:2px solid var(--border); cursor:pointer;
+  transition:all 0.3s; background:var(--dark4);
+  text-align:center;
+}
+.role-card:hover, .role-card.selected {
+  border-color: var(--gold);
+  background: rgba(212,175,55,0.1);
+  transform: translateY(-2px);
+}
+.role-icon { font-size:32px; display:block; margin-bottom:8px; }
+.role-name { font-size:13px; font-weight:700; color:var(--gold); }
+
+/* ===== FORM ===== */
+.form-group { margin-bottom:16px; }
+.form-label { font-size:13px; color:var(--muted); margin-bottom:6px; display:block; font-weight:500; }
+.form-input {
+  width:100%; padding:14px 16px; background:var(--dark4);
+  border:1px solid var(--border); border-radius:12px;
+  color:var(--text); font-family:inherit; font-size:15px;
+  transition:all 0.3s; outline:none;
+}
+.form-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+
+.btn {
+  width:100%; padding:15px; border:none; border-radius:12px;
+  cursor:pointer; font-family:inherit; font-size:16px;
+  font-weight:700; transition:all 0.3s; position:relative;
+  overflow:hidden;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark);
+}
+.btn-gold:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,175,55,0.4); }
+.btn-ghost {
+  background:transparent; color:var(--gold);
+  border:1px solid var(--border); margin-top:8px;
+}
+.btn-ghost:hover { background:rgba(212,175,55,0.08); }
+.btn:active { transform:scale(0.98); }
+
+.toggle-auth { text-align:center; margin-top:16px; font-size:13px; color:var(--muted); }
+.toggle-auth span { color:var(--gold); cursor:pointer; font-weight:600; }
+.toggle-auth span:hover { text-decoration:underline; }
+
+/* ===== TOAST ===== */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
+  padding:14px 24px; border-radius:50px; font-size:14px; font-weight:600;
+  z-index:9999; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none; white-space:nowrap; max-width:90vw;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+#toast.success { background:var(--green); color:#fff; }
+#toast.error { background:var(--red); color:#fff; }
+#toast.info { background:var(--gold); color:var(--dark); }
+
+/* ===== NAV ===== */
+.navbar {
+  position:sticky; top:0; z-index:100;
+  background: rgba(10,10,10,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  height:64px;
+}
+.nav-logo {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:4px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-actions { display:flex; align-items:center; gap:12px; }
+.nav-btn {
+  padding:8px 16px; border-radius:50px; border:none;
+  cursor:pointer; font-family:inherit; font-size:13px;
+  font-weight:600; transition:all 0.3s;
+}
+.nav-lang { background:var(--dark3); color:var(--gold); border:1px solid var(--border); }
+.nav-logout { background:rgba(192,57,43,0.2); color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
+.nav-logout:hover { background:rgba(192,57,43,0.35); }
+.nav-cart-btn {
+  position:relative; background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); padding:8px 16px; border-radius:50px;
+  display:flex; align-items:center; gap:6px;
+}
+.cart-badge {
+  position:absolute; top:-6px; right:-6px;
+  background:var(--red); color:#fff; font-size:11px; font-weight:700;
+  width:20px; height:20px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  display:none;
+}
+.cart-badge.show { display:flex; }
+
+/* ===== SETTINGS DROPDOWN ===== */
+.settings-wrap { position:relative; }
+.settings-btn {
+  width:40px; height:40px; border-radius:50%; border:1px solid var(--border);
+  background:rgba(212,175,55,0.15); color:var(--gold);
+  cursor:pointer; font-size:18px; display:flex; align-items:center;
+  justify-content:center; transition:all 0.3s;
+}
+.settings-btn:hover { background:rgba(212,175,55,0.3); }
+.settings-dropdown {
+  position:absolute; top:48px; left:0;
+  background:var(--dark2); border:1px solid var(--border);
+  border-radius:16px; padding:8px; min-width:200px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  display:none; flex-direction:column; gap:4px; z-index:999;
+}
+body.ltr .settings-dropdown { left:auto; right:0; }
+.settings-dropdown.open { display:flex; }
+.sdrop-item {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px; border-radius:10px; border:none;
+  background:transparent; color:var(--text);
+  cursor:pointer; font-family:inherit; font-size:14px;
+  font-weight:600; text-align:right; width:100%;
+  transition:background 0.2s;
+}
+.sdrop-item:hover { background:rgba(212,175,55,0.1); }
+.sdrop-item .sdrop-icon { font-size:18px; width:24px; text-align:center; flex-shrink:0; }
+.sdrop-divider { height:1px; background:var(--border); margin:4px 0; }
+
+/* ===== BOTTOM NAV 3 BTNS ===== */
+.bnav-cart-badge {
+  position:absolute; top:-4px; right:-4px;
+  background:var(--red); color:#fff; font-size:10px; font-weight:700;
+  width:18px; height:18px; border-radius:50%;
+  display:none; align-items:center; justify-content:center;
+}
+.bnav-cart-badge.show { display:flex; }
+.bnav-btn { position:relative; }
+
+/* ===== CUSTOMER ===== */
+#customer-page { background: var(--dark); }
+.hero-banner {
+  background: linear-gradient(135deg, #1A0E00, #0A0A0A);
+  padding:40px 20px;
+  text-align:center;
+  position:relative; overflow:hidden;
+}
+.hero-banner::before {
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.12) 0%, transparent 70%);
+}
+.hero-title { font-size:clamp(24px,6vw,48px); font-weight:900; position:relative;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub { color:var(--muted); font-size:14px; position:relative; margin-top:8px; }
+
+.categories {
+  display:flex; gap:10px; padding:20px; overflow-x:auto;
+  scrollbar-width:none; -ms-overflow-style:none;
+}
+.categories::-webkit-scrollbar { display:none; }
+.cat-btn {
+  padding:10px 20px; border-radius:50px; border:1px solid var(--border);
+  background:var(--dark3); color:var(--muted); cursor:pointer;
+  font-family:inherit; font-size:14px; font-weight:600;
+  white-space:nowrap; transition:all 0.3s; flex-shrink:0;
+}
+.cat-btn.active, .cat-btn:hover {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); border-color:transparent;
+}
+
+.menu-grid {
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap:20px; padding:20px;
+}
+.menu-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden;
+  transition:all 0.3s; cursor:pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  position:relative;
+}
+.menu-card:hover {
+  transform:translateY(-6px);
+  box-shadow:0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.3);
+  border-color: rgba(212,175,55,0.4);
+}
+.card-img {
+  width:100%; height:180px; object-fit:cover;
+  background:var(--dark4);
+}
+.card-img-placeholder {
+  width:100%; height:180px; background:var(--dark4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:48px;
+}
+.card-body { padding:16px; }
+.card-name { font-size:17px; font-weight:700; margin-bottom:4px; }
+.card-cat { font-size:12px; color:var(--muted); margin-bottom:12px; }
+.card-footer { display:flex; align-items:center; justify-content:space-between; }
+.card-price {
+  font-family:'Bebas Neue',sans-serif; font-size:24px;
+  color:var(--gold); letter-spacing:1px;
+}
+.card-price span { font-family:inherit; font-size:13px; color:var(--muted); }
+.add-btn {
+  width:40px; height:40px; border-radius:50%; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; transition:all 0.3s;
+}
+.add-btn:hover { transform:scale(1.15) rotate(90deg); }
+
+/* ===== CART DRAWER ===== */
+.drawer-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  z-index:200; opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.drawer-overlay.open { opacity:1; pointer-events:all; }
+
+.cart-drawer {
+  position:fixed; top:0; bottom:0; z-index:201;
+  width:min(400px,92vw); background:var(--dark2);
+  display:flex; flex-direction:column;
+  transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+  /* دايماً على اليمين */
+  right:0; left:auto;
+  border-left:1px solid var(--border);
+  transform:translateX(100%);
+}
+.cart-drawer.open { transform:translateX(0) !important; }
+
+.drawer-header {
+  padding:20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.drawer-title { font-size:20px; font-weight:800; color:var(--gold); }
+.close-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--dark3); color:var(--text); cursor:pointer; font-size:18px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+}
+.close-btn:hover { background:var(--red); border-color:var(--red); }
+
+.drawer-items { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.drawer-item {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:14px; padding:14px;
+  display:flex; align-items:center; gap:12px;
+}
+.item-img { width:56px; height:56px; border-radius:10px; object-fit:cover; background:var(--dark4); flex-shrink:0; }
+.item-info { flex:1; min-width:0; }
+.item-name { font-size:14px; font-weight:600; }
+.item-price { font-size:13px; color:var(--gold); margin-top:2px; }
+.qty-control { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.qty-btn {
+  width:28px; height:28px; border-radius:50%; border:1px solid var(--border);
+  background:var(--dark4); color:var(--text); cursor:pointer; font-size:16px;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+  transition:all 0.2s;
+}
+.qty-btn:hover { border-color:var(--gold); color:var(--gold); }
+.qty-num { font-weight:700; min-width:20px; text-align:center; }
+.item-del {
+  width:32px; height:32px; border-radius:50%; border:none;
+  background:rgba(192,57,43,0.15); color:var(--red); cursor:pointer;
+  font-size:16px; transition:all 0.2s; flex-shrink:0;
+}
+.item-del:hover { background:rgba(192,57,43,0.3); }
+
+.drawer-footer {
+  padding:20px; border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:12px;
+}
+.total-row { display:flex; justify-content:space-between; align-items:center; }
+.total-label { font-size:15px; color:var(--muted); }
+.total-amount {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold);
+  letter-spacing:1px;
+}
+.empty-cart { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty-icon { font-size:48px; margin-bottom:12px; opacity:0.5; }
+
+/* ===== ORDERS ===== */
+#orders-page { background:var(--dark); padding:20px; }
+.section-title {
+  font-size:22px; font-weight:800; color:var(--gold);
+  margin-bottom:16px; display:flex; align-items:center; gap:10px;
+}
+.orders-list { display:flex; flex-direction:column; gap:16px; }
+.order-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden;
+}
+.order-header {
+  padding:16px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.order-id { font-size:13px; color:var(--muted); }
+.order-date { font-size:12px; color:var(--muted); }
+.status-badge {
+  padding:5px 12px; border-radius:50px; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.status-pending { background:rgba(212,175,55,0.2); color:var(--gold); }
+.status-accepted { background:rgba(39,174,96,0.2); color:var(--green); }
+.status-rejected { background:rgba(192,57,43,0.2); color:var(--red); }
+.status-delivered { background:rgba(52,152,219,0.2); color:#3498db; }
+
+.order-items-list { padding:16px 20px; display:flex; flex-direction:column; gap:8px; }
+.oi-row { display:flex; justify-content:space-between; font-size:14px; }
+.oi-name { color:var(--text); }
+.oi-qty { color:var(--muted); }
+.oi-price { color:var(--gold); font-weight:600; }
+.order-total-row {
+  padding:12px 20px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.order-actions { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; }
+.order-actions.hidden { display:none; }
+.btn-sm {
+  padding:8px 16px; border-radius:10px; border:none;
+  cursor:pointer; font-family:inherit; font-size:13px; font-weight:600;
+  transition:all 0.2s;
+}
+.btn-delete { background:rgba(192,57,43,0.2); color:var(--red); }
+.btn-delete:hover { background:rgba(192,57,43,0.35); }
+.btn-chat { background:rgba(212,175,55,0.2); color:var(--gold); }
+.btn-chat:hover { background:rgba(212,175,55,0.35); }
+
+/* ===== WAITER ===== */
+#waiter-page { background:var(--dark); }
+.waiter-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; padding:20px; }
+.waiter-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden; transition:all 0.3s;
+}
+.waiter-card:hover { border-color:rgba(212,175,55,0.4); }
+.new-order-badge {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); text-align:center; padding:6px;
+  font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0%,100%{opacity:1} 50%{opacity:0.7}
+}
+.waiter-card-header { padding:16px 20px; border-bottom:1px solid var(--border); }
+.customer-name { font-size:17px; font-weight:700; }
+.order-meta { font-size:12px; color:var(--muted); margin-top:4px; }
+.waiter-actions { padding:12px 20px; display:flex; gap:8px; }
+.btn-accept { background:rgba(39,174,96,0.2); color:var(--green); }
+.btn-accept:hover { background:rgba(39,174,96,0.35); }
+.btn-reject { background:rgba(192,57,43,0.2); color:var(--red); }
+.btn-reject:hover { background:rgba(192,57,43,0.35); }
+
+/* ===== CHAT ===== */
+.chat-modal {
+  position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,0.8);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.chat-modal.open { opacity:1; pointer-events:all; }
+.chat-box {
+  background:var(--dark2); border:1px solid var(--border);
+  border-radius:24px; width:min(480px,100%);
+  height:min(600px,80vh); display:flex; flex-direction:column;
+  box-shadow:var(--shadow); transform:scale(0.95);
+  transition:transform 0.3s;
+}
+.chat-modal.open .chat-box { transform:scale(1); }
+.chat-header {
+  padding:16px 20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.chat-title { font-size:17px; font-weight:700; color:var(--gold); }
+.chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.msg { max-width:75%; padding:10px 14px; border-radius:16px; font-size:14px; line-height:1.5; }
+.msg.mine { align-self:flex-end; background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(240,192,96,0.2)); border:1px solid rgba(212,175,55,0.3); }
+.msg.theirs { align-self:flex-start; background:var(--dark3); border:1px solid var(--border); }
+.msg-time { font-size:10px; color:var(--muted); margin-top:4px; }
+.chat-input-row { padding:16px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.chat-input {
+  flex:1; padding:12px 16px; background:var(--dark3);
+  border:1px solid var(--border); border-radius:12px;
+  color:var(--text); font-family:inherit; font-size:14px; outline:none;
+}
+.chat-input:focus { border-color:var(--gold); }
+.send-btn {
+  width:44px; height:44px; border-radius:12px; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); cursor:pointer; font-size:18px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+}
+.send-btn:hover { transform:scale(1.1); }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background:rgba(10,10,10,0.95); backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex; justify-content:space-around; padding:8px 0;
+  padding-bottom:max(8px, env(safe-area-inset-bottom));
+}
+.bnav-btn {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:8px 16px; border:none; background:transparent;
+  cursor:pointer; color:var(--muted); transition:all 0.2s;
+  font-family:inherit; font-size:11px; font-weight:600;
+  border-radius:12px; min-width:60px;
+}
+.bnav-btn.active, .bnav-btn:hover { color:var(--gold); }
+.bnav-btn.active .bnav-icon { filter:drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+.bnav-icon { font-size:22px; }
+
+/* ===== LOADER ===== */
+#loader {
+  position:fixed; inset:0; z-index:9999;
+  background:var(--dark);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+}
+.loader-logo {
+  font-family:'Bebas Neue',sans-serif; font-size:72px; letter-spacing:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  animation: fadeInUp 0.8s ease forwards;
+}
+.loader-bar { width:200px; height:3px; background:var(--dark3); border-radius:2px; overflow:hidden; }
+.loader-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); width:0; transition:width 0.5s ease; }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--dark3); }
+::-webkit-scrollbar-thumb { background:var(--gold); border-radius:2px; }
+
+/* ===== ANIMATIONS ===== */
+.fade-in { animation:fadeInUp 0.4s ease forwards; }
+@keyframes cardIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.card-anim { animation:cardIn 0.4s ease forwards; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty-state-icon { font-size:64px; opacity:0.4; margin-bottom:16px; }
+.empty-state-text { font-size:16px; }
+
+/* ===== CLICK RIPPLE ===== */
+.ripple { position:absolute; border-radius:50%; transform:scale(0);
+  animation:ripple-anim 0.6s linear; background:rgba(212,175,55,0.3); pointer-events:none; }
+@keyframes ripple-anim { to{transform:scale(4);opacity:0} }
+
+/* ===== SUPABASE CONFIG NOTICE ===== */
+.config-notice {
+  background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.4);
+  border-radius:14px; padding:16px; margin-bottom:20px;
+  font-size:13px; color:var(--gold); line-height:1.6;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar-wrap {
+  padding:12px 20px 0;
+}
+.search-bar {
+  width:100%; padding:12px 16px; background:var(--dark3);
+  border:1px solid var(--border); border-radius:12px;
+  color:var(--text); font-family:inherit; font-size:15px;
+  outline:none; transition:all 0.3s;
+}
+.search-bar:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+
+/* ===== WAITER CODE MODAL ===== */
+.waiter-code-modal {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.85);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.waiter-code-modal.open { opacity:1; pointer-events:all; }
+.waiter-code-box {
+  background:var(--dark2); border:1px solid var(--border);
+  border-radius:24px; width:min(400px,100%);
+  padding:32px; box-shadow:var(--shadow);
+  transform:scale(0.95); transition:transform 0.3s; text-align:center;
+}
+.waiter-code-modal.open .waiter-code-box { transform:scale(1); }
+.waiter-code-title { font-size:22px; font-weight:800; color:var(--gold); margin-bottom:8px; }
+.waiter-code-sub { color:var(--muted); font-size:14px; margin-bottom:24px; }
+
+/* ===== ADMIN PANEL ===== */
+#admin-page { background:var(--dark); padding:20px; }
+.admin-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:16px; }
+.code-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:16px; padding:16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.code-value { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); letter-spacing:3px; }
+.code-status { font-size:12px; font-weight:700; padding:4px 10px; border-radius:50px; }
+.code-used { background:rgba(192,57,43,0.2); color:var(--red); }
+.code-available { background:rgba(39,174,96,0.2); color:var(--green); }
+.btn-gen { 
+  padding:12px 24px; border-radius:12px; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-family:inherit; font-size:15px; font-weight:700;
+  cursor:pointer; transition:all 0.3s; margin-top:16px;
+}
+.btn-gen:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,175,55,0.4); }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px) {
+  .menu-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+  .cart-drawer { width:100vw; }
+}
+
+/* RTL/LTR adjustments */
+body.ltr .drawer-title, body.ltr .section-title { font-family:'Outfit',sans-serif; }
+body.ltr .card-name, body.ltr .customer-name { font-family:'Outfit',sans-serif; }
+
+/* ===== ADMIN TABS ===== */
+.admin-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+.admin-tab {
+  padding:10px 20px; border-radius:50px; border:1px solid var(--border);
+  background:var(--dark3); color:var(--muted); cursor:pointer;
+  font-family:inherit; font-size:14px; font-weight:600; transition:all 0.3s;
+}
+.admin-tab.active {
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); border-color:transparent;
+}
+
+/* ===== STATS CARDS ===== */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; padding:20px; text-align:center;
+}
+.stat-value {
+  font-family:'Bebas Neue',sans-serif; font-size:42px;
+  color:var(--gold); letter-spacing:2px; line-height:1;
+}
+.stat-label { font-size:13px; color:var(--muted); margin-top:6px; }
+.stat-sub { font-size:12px; color:var(--gold2); margin-top:4px; font-weight:600; }
+
+/* ===== WAITER STATS ===== */
+.waiter-stat-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden; margin-bottom:12px;
+}
+.waiter-stat-header {
+  padding:16px 20px; display:flex; align-items:center;
+  justify-content:space-between; cursor:pointer;
+  border-bottom:1px solid transparent; transition:border-color 0.3s;
+}
+.waiter-stat-header:hover { border-bottom-color:var(--border); }
+.waiter-stat-name { font-size:17px; font-weight:700; }
+.waiter-stat-badges { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.badge-accepted { background:rgba(39,174,96,0.2); color:var(--green); padding:4px 10px; border-radius:50px; font-size:12px; font-weight:700; }
+.badge-rejected { background:rgba(192,57,43,0.2); color:var(--red); padding:4px 10px; border-radius:50px; font-size:12px; font-weight:700; }
+.badge-pending { background:rgba(212,175,55,0.2); color:var(--gold); padding:4px 10px; border-radius:50px; font-size:12px; font-weight:700; }
+.waiter-stat-body { padding:0 20px; max-height:0; overflow:hidden; transition:max-height 0.4s ease, padding 0.3s; }
+.waiter-stat-body.open { max-height:600px; padding:16px 20px; }
+.chat-preview-card {
+  background:var(--dark4); border:1px solid var(--border);
+  border-radius:14px; padding:14px; margin-bottom:10px;
+}
+.chat-preview-header { display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; color:var(--muted); }
+.chat-preview-msg { font-size:13px; padding:6px 10px; border-radius:10px; margin-bottom:4px; max-width:85%; }
+.chat-preview-msg.from-customer { background:var(--dark3); border:1px solid var(--border); align-self:flex-start; }
+.chat-preview-msg.from-waiter { background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.2); align-self:flex-end; margin-right:auto; }
+.chat-preview-msgs { display:flex; flex-direction:column; gap:4px; }
+
+/* ===== CODE NAME INPUT ===== */
+.code-name-input {
+  background:var(--dark4); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-family:inherit;
+  font-size:13px; padding:6px 10px; width:120px; outline:none;
+  transition:border-color 0.2s;
+}
+.code-name-input:focus { border-color:var(--gold); }
+.btn-save-name {
+  padding:6px 12px; border-radius:8px; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-family:inherit; font-size:12px;
+  font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.btn-save-name:hover { transform:scale(1.05); }
+
+/* ===== PROFILE PAGE ===== */
+#profile-page { background:var(--dark); padding-bottom:80px; }
+.profile-hero {
+  background:linear-gradient(135deg,#1A0E00,#0A0A0A);
+  padding:40px 20px 80px; text-align:center; position:relative;
+}
+.profile-hero::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(212,175,55,0.12) 0%,transparent 70%);
+}
+.profile-avatar-wrap {
+  position:relative; display:inline-block; margin-bottom:16px; z-index:1;
+}
+.profile-avatar {
+  width:100px; height:100px; border-radius:50%;
+  object-fit:cover; border:3px solid var(--gold);
+  background:var(--dark4); display:block;
+}
+.avatar-placeholder {
+  width:100px; height:100px; border-radius:50%;
+  background:var(--dark3); border:3px solid var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:40px; color:var(--gold);
+}
+.avatar-edit-btn {
+  position:absolute; bottom:0; right:0;
+  width:32px; height:32px; border-radius:50%; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+.profile-name { font-size:22px; font-weight:800; position:relative; z-index:1; }
+.profile-email { color:var(--muted); font-size:13px; margin-top:4px; position:relative; z-index:1; }
+.profile-role-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 16px; border-radius:50px; font-size:13px; font-weight:700;
+  margin-top:10px; position:relative; z-index:1;
+}
+.role-customer { background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid rgba(212,175,55,0.4); }
+.role-admin { background:rgba(192,57,43,0.2); color:#e74c3c; border:1px solid rgba(192,57,43,0.4); }
+.role-waiter { background:rgba(39,174,96,0.2); color:var(--green); border:1px solid rgba(39,174,96,0.4); }
+
+.profile-card {
+  background:var(--dark3); border:1px solid var(--border);
+  border-radius:20px; padding:20px; margin:0 16px 16px;
+}
+.profile-card-title {
+  font-size:14px; color:var(--muted); margin-bottom:16px;
+  font-weight:600; text-transform:uppercase; letter-spacing:1px;
+}
+.profile-field { margin-bottom:14px; }
+.profile-field:last-child { margin-bottom:0; }
+.profile-field-label { font-size:12px; color:var(--muted); margin-bottom:6px; display:block; }
+.profile-field-input {
+  width:100%; padding:12px 14px; background:var(--dark4);
+  border:1px solid var(--border); border-radius:12px;
+  color:var(--text); font-family:inherit; font-size:14px;
+  outline:none; transition:all 0.3s;
+}
+.profile-field-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+.profile-save-btn {
+  width:100%; padding:14px; border:none; border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-family:inherit; font-size:15px;
+  font-weight:700; cursor:pointer; transition:all 0.3s; margin-top:4px;
+}
+.profile-save-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(212,175,55,0.4); }
+.profile-delete-btn {
+  width:100%; padding:14px; border:1px solid var(--red); border-radius:12px;
+  background:rgba(192,57,43,0.1); color:var(--red); font-family:inherit;
+  font-size:15px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-top:8px;
+}
+.profile-delete-btn:hover { background:rgba(192,57,43,0.2); }
+.profile-logout-btn {
+  width:100%; padding:14px; border:1px solid var(--border); border-radius:12px;
+  background:transparent; color:var(--muted); font-family:inherit;
+  font-size:15px; font-weight:700; cursor:pointer; transition:all 0.3s; margin-top:8px;
+}
+.profile-logout-btn:hover { background:var(--dark3); color:var(--text); }
+.profile-top-offset { margin-top:-50px; }
+
+/* ===== PROMO CODE ===== */
+.promo-row {
+  display:flex; gap:8px; margin-bottom:10px;
+}
+.promo-input {
+  flex:1; padding:10px 14px; background:var(--dark3);
+  border:1px solid var(--border); border-radius:10px;
+  color:var(--text); font-family:inherit; font-size:14px;
+  outline:none; letter-spacing:2px; font-weight:700;
+  transition:border-color 0.3s;
+}
+.promo-input:focus { border-color:var(--gold); }
+.promo-input.valid { border-color:var(--green); }
+.promo-input.invalid { border-color:var(--red); }
+.promo-btn {
+  padding:10px 16px; border-radius:10px; border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark); font-family:inherit; font-size:13px; font-weight:800;
+  cursor:pointer; transition:all 0.3s; white-space:nowrap;
+}
+.promo-btn:hover { transform:translateY(-1px); }
+
+/* ===== SPLIT LAYOUT (WAITER + CUSTOMER) ===== */
+.split-layout {
+  display:grid !important;
+  grid-template-columns:1fr 1fr;
+  height:100vh;
+  overflow:hidden;
+  position:fixed;
+  inset:0;
+  z-index:10;
+}
+.split-layout > .page {
+  display:block !important;
+  overflow-y:auto;
+  height:100vh;
+}
+.split-layout > .page:first-child {
+  border-left:2px solid var(--border);
+}
+.split-divider-label {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:var(--gold);
+  color:var(--dark);
+  font-weight:800;
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:50px;
+  z-index:20;
+  pointer-events:none;
+}
+@media(max-width:900px) {
+  .split-layout { grid-template-columns:1fr; }
+  .split-layout > .page.customer-side { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOADER ===== -->
+<div id="loader">
+  <div class="loader-logo">LOKI</div>
+  <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing" class="page active">
+  <div class="logo-container">
+    <div class="logo-glow"></div>
+    <div class="logo-main">LOKI</div>
+    <div class="logo-sub" data-ar="مطعم لوكي الفاخر" data-en="Fine Dining Experience">مطعم لوكي الفاخر</div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('ar')">العربية</button>
+    <button class="lang-btn" onclick="setLang('en')">English</button>
+  </div>
+  <div class="landing-card">
+    <div class="landing-title" data-ar="مرحباً بك 👋" data-en="Welcome 👋">مرحباً بك 👋</div>
+    <div class="landing-sub" data-ar="سجّل دخولك للمتابعة" data-en="Sign in to continue">سجّل دخولك للمتابعة</div>
+    <div class="role-cards" id="roleCards">
+      <div class="role-card selected" onclick="selectRole('customer',this)">
+        <span class="role-icon">🍽️</span>
+        <div class="role-name" data-ar="زبون" data-en="Customer">زبون</div>
+      </div>
+      <div class="role-card" onclick="selectRole('waiter',this)">
+        <span class="role-icon">🧑‍🍳</span>
+        <div class="role-name" data-ar="نادل" data-en="Waiter">نادل</div>
+      </div>
+    </div>
+    <div id="authForm">
+      <div class="form-group">
+        <label class="form-label" data-ar="الاسم الكامل" data-en="Full Name" id="nameLabel">الاسم الكامل</label>
+        <input type="text" id="nameInput" class="form-input" placeholder="" style="display:none">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</label>
+        <input type="email" id="emailInput" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
+        <input type="password" id="passInput" class="form-input">
+      </div>
+      <div class="form-group" id="waiterCodeGroup" style="display:none">
+        <label class="form-label" data-ar="🔐 كود النادل" data-en="🔐 Waiter Code">🔐 كود النادل</label>
+        <input type="text" id="waiterCodeInline" class="form-input" maxlength="6" placeholder="XXXXXX" style="text-align:center;letter-spacing:8px;font-size:22px;font-family:Bebas Neue,sans-serif;">
+      </div>
+      <button class="btn btn-gold" id="authBtn" onclick="handleAuth()">
+        <span data-ar="دخول" data-en="Sign In">دخول</span>
+      </button>
+      <button class="btn btn-ghost" onclick="toggleAuthMode()">
+        <span id="toggleBtnText" data-ar="ليس لديك حساب؟ سجل الآن" data-en="No account? Register">ليس لديك حساب؟ سجل الآن</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER PAGE ===== -->
+<div id="customer-page" class="page">
+  <nav class="navbar">
+    <div class="nav-logo">LOKI</div>
+    <div class="nav-actions">
+      <div class="settings-wrap">
+        <button class="settings-btn" onclick="toggleSettingsDropdown(event)">☰</button>
+        <div class="settings-dropdown" id="settingsDropdown">
+          <button class="sdrop-item" onclick="closeSettingsDropdown();showProfilePage()">
+            <span class="sdrop-icon">👤</span>
+            <span data-ar="الملف الشخصي" data-en="Profile">الملف الشخصي</span>
+          </button>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleLang()">
+            <span class="sdrop-icon">🌐</span>
+            <span data-ar="اللغة" data-en="Language">اللغة</span>
+          </button>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleSound()">
+            <span class="sdrop-icon" id="soundIcon">🔊</span>
+            <span id="soundLabel" data-ar="الصوت: شغال" data-en="Sound: On">الصوت: شغال</span>
+          </button>
+          <div class="sdrop-divider"></div>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleThemeMode()">
+            <span class="sdrop-icon" id="dropThemeIcon">☀️</span>
+            <span id="dropThemeLabel" data-ar="مود النهار" data-en="Light Mode">مود النهار</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="hero-banner">
+    <div class="hero-title" data-ar="قائمة الطعام 🍴" data-en="Our Menu 🍴">قائمة الطعام 🍴</div>
+    <div class="hero-sub" id="greetMsg"></div>
+  </div>
+  <div class="search-bar-wrap">
+    <input type="text" class="search-bar" id="searchInput" placeholder="🔍 ابحث عن صنف..." oninput="searchMenu(this.value)" data-ar-placeholder="🔍 ابحث عن صنف..." data-en-placeholder="🔍 Search for an item...">
+  </div>
+  <div class="categories" id="categoriesRow"></div>
+  <div class="menu-grid" id="menuGrid"></div>
+  <div style="height:80px"></div>
+  <nav class="bottom-nav">
+    <button class="bnav-btn active" onclick="showSubPage('menu')" id="menuNavBtn">
+      <span class="bnav-icon">🍽️</span>
+      <span data-ar="المنيو" data-en="Menu">المنيو</span>
+    </button>
+    <button class="bnav-btn" onclick="showSubPage('myorders')" id="ordersNavBtn">
+      <span class="bnav-icon">📋</span>
+      <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
+    </button>
+    <button class="bnav-btn" onclick="toggleCart()" id="cartNavBtn">
+      <span class="bnav-icon" style="position:relative;display:inline-block;">
+        🛒
+        <span class="bnav-cart-badge" id="cartBadge">0</span>
+      </span>
+      <span data-ar="السلة" data-en="Cart">السلة</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===== ORDERS SUB-PAGE ===== -->
+<div id="orders-page" class="page">
+  <nav class="navbar">
+    <div class="nav-logo">LOKI</div>
+    <div class="nav-actions">
+      <div class="settings-wrap">
+        <button class="settings-btn" onclick="toggleSettingsDropdown(event)">☰</button>
+        <div class="settings-dropdown" id="settingsDropdown2">
+          <button class="sdrop-item" onclick="closeSettingsDropdown();showProfilePage()">
+            <span class="sdrop-icon">👤</span>
+            <span data-ar="الملف الشخصي" data-en="Profile">الملف الشخصي</span>
+          </button>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleLang()">
+            <span class="sdrop-icon">🌐</span>
+            <span data-ar="اللغة" data-en="Language">اللغة</span>
+          </button>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleSound()">
+            <span class="sdrop-icon">🔊</span>
+            <span data-ar="الصوت: شغال" data-en="Sound: On">الصوت: شغال</span>
+          </button>
+          <div class="sdrop-divider"></div>
+          <button class="sdrop-item" onclick="closeSettingsDropdown();toggleThemeMode()">
+            <span class="sdrop-icon">☀️</span>
+            <span data-ar="مود النهار" data-en="Light Mode">مود النهار</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div style="padding:20px">
+    <div class="section-title">
+      <span>📋</span>
+      <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
+    </div>
+    <div id="ordersList" class="orders-list"></div>
+  </div>
+  <div style="height:80px"></div>
+  <nav class="bottom-nav">
+    <button class="bnav-btn" onclick="showSubPage('menu')" id="menuNavBtn2">
+      <span class="bnav-icon">🍽️</span>
+      <span data-ar="المنيو" data-en="Menu">المنيو</span>
+    </button>
+    <button class="bnav-btn active" onclick="showSubPage('myorders')" id="ordersNavBtn2">
+      <span class="bnav-icon">📋</span>
+      <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
+    </button>
+    <button class="bnav-btn" onclick="toggleCart()" id="cartNavBtn2">
+      <span class="bnav-icon" style="position:relative;display:inline-block;">
+        🛒
+        <span class="bnav-cart-badge" id="cartBadge2">0</span>
+      </span>
+      <span data-ar="السلة" data-en="Cart">السلة</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===== WAITER PAGE ===== -->
+<div id="waiter-page" class="page">
+  <nav class="navbar">
+    <div class="nav-logo">LOKI</div>
+    <div class="nav-actions">
+      <button class="nav-btn nav-lang" onclick="toggleLang()">EN/AR</button>
+      <button class="nav-btn" style="background:rgba(212,175,55,0.15);color:var(--gold);border:1px solid var(--border);" onclick="showProfilePage()">👤</button>
+    </div>
+  </nav>
+  <div style="padding:20px">
+    <div class="section-title">
+      <span>🧑‍🍳</span>
+      <span data-ar="لوحة النادل - الطلبات الجديدة" data-en="Waiter Panel - New Orders">لوحة النادل - الطلبات الجديدة</span>
+    </div>
+    <div id="waiterGrid" class="waiter-grid"></div>
+  </div>
+</div>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="drawer-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" data-ar="🛒 سلة الطلبات" data-en="🛒 Your Cart">🛒 سلة الطلبات</div>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-items" id="cartItems"></div>
+  <div class="drawer-footer">
+    <!-- حقل كود الخصم -->
+    <div class="promo-row" id="promoRow">
+      <input type="text" id="promoInput" class="promo-input" placeholder="كود الخصم..." data-ar-placeholder="كود الخصم..." data-en-placeholder="Promo code..." maxlength="20" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+      <button class="promo-btn" onclick="applyPromoCode()"><span data-ar="تطبيق" data-en="Apply">تطبيق</span></button>
+    </div>
+    <div id="promoStatus" style="display:none;font-size:13px;padding:6px 0;text-align:center;"></div>
+    <div class="total-row">
+      <span class="total-label" data-ar="المجموع" data-en="Total">المجموع</span>
+      <span class="total-amount" id="cartTotal">0 IQD</span>
+    </div>
+    <div class="total-row" id="promoDiscountRow" style="display:none;">
+      <span style="color:var(--green);font-size:13px;" data-ar="الخصم" data-en="Discount">الخصم</span>
+      <span style="color:var(--green);font-weight:700;" id="promoDiscountAmt"></span>
+    </div>
+    <div class="total-row" id="promoFinalRow" style="display:none;border-top:1px solid var(--border);padding-top:10px;">
+      <span style="font-weight:800;" data-ar="الإجمالي بعد الخصم" data-en="Final Total">الإجمالي بعد الخصم</span>
+      <span style="color:var(--gold);font-weight:800;font-size:18px;" id="promoFinalAmt"></span>
+    </div>
+    <button class="btn btn-gold" onclick="placeOrder()">
+      <span data-ar="✅ تأكيد الطلب" data-en="✅ Place Order">✅ تأكيد الطلب</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== WAITER CODE MODAL ===== -->
+<div class="waiter-code-modal" id="waiterCodeModal">
+  <div class="waiter-code-box">
+    <div class="waiter-code-title" data-ar="🔐 كود النادل" data-en="🔐 Waiter Code">🔐 كود النادل</div>
+    <div class="waiter-code-sub" data-ar="أدخل الكود الخاص بك للدخول كنادل" data-en="Enter your code to access as a waiter">أدخل الكود الخاص بك للدخول كنادل</div>
+    <div class="form-group">
+      <input type="text" id="waiterCodeInput" class="form-input" maxlength="6" placeholder="XXXXXX" style="text-align:center;letter-spacing:8px;font-size:24px;font-family:'Bebas Neue',sans-serif;">
+    </div>
+    <button class="btn btn-gold" onclick="verifyWaiterCode()" style="margin-top:8px">
+      <span data-ar="تحقق" data-en="Verify">تحقق</span>
+    </button>
+    <button class="btn btn-ghost" onclick="closeWaiterCodeModal()" style="margin-top:8px">
+      <span data-ar="إلغاء" data-en="Cancel">إلغاء</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== ADMIN PAGE ===== -->
+<div id="admin-page" class="page">
+  <nav class="navbar">
+    <div class="nav-logo">LOKI</div>
+    <div class="nav-actions">
+      <button class="nav-btn nav-lang" onclick="toggleLang()">EN/AR</button>
+      <button class="nav-btn" style="background:rgba(212,175,55,0.15);color:var(--gold);border:1px solid var(--border);" onclick="showProfilePage()">👤</button>
+    </div>
+  </nav>
+  <div style="padding:20px">
+    <div class="section-title"><span>👑</span><span data-ar="لوحة المدير" data-en="Admin Panel">لوحة المدير</span></div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('codes',this)">🔐 <span data-ar="أكواد النادلين" data-en="Waiter Codes">أكواد النادلين</span></button>
+      <button class="admin-tab" onclick="switchAdminTab('waiters',this)">🧑‍🍳 <span data-ar="إحصائيات النادلين" data-en="Waiter Stats">إحصائيات النادلين</span></button>
+      <button class="admin-tab" onclick="switchAdminTab('orders',this)">📊 <span data-ar="إحصائيات الطلبات" data-en="Order Stats">إحصائيات الطلبات</span></button>
+      <button class="admin-tab" onclick="switchAdminTab('promo',this)">🎟️ <span data-ar="أكواد الخصم" data-en="Promo Codes">أكواد الخصم</span></button>
+      <button class="admin-tab" onclick="switchAdminTab('menu',this)">🍽️ <span data-ar="إضافة وجبات" data-en="Add Menu Items">إضافة وجبات</span></button>
+      <button class="admin-tab" onclick="switchAdminTab('itemdiscount',this)">🏷️ <span data-ar="خصم على وجبة" data-en="Item Discount">خصم على وجبة</span></button>
+    </div>
+    <div id="adminTab-codes">
+      <button class="btn-gen" onclick="generateCodes()"><span data-ar="➕ توليد 10 أكواد جديدة" data-en="➕ Generate 10 New Codes">➕ توليد 10 أكواد جديدة</span></button>
+      <div class="admin-grid" id="adminCodesGrid"></div>
+    </div>
+    <div id="adminTab-waiters" style="display:none">
+      <div id="waiterStatsList"></div>
+    </div>
+    <div id="adminTab-orders" style="display:none">
+      <div class="stats-grid" id="orderStatsGrid"></div>
+    </div>
+    <div id="adminTab-promo" style="display:none">
+      <div id="promoCodesList"></div>
+      <div style="background:var(--dark3);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:20px;margin-top:16px;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold);">➕ <span data-ar="إضافة كود خصم جديد" data-en="Add New Promo Code">إضافة كود خصم جديد</span></div>
+        <div style="display:grid;gap:12px;">
+          <input type="text" id="newPromoCode" class="form-input" placeholder="الكود (مثال: LOKI20)" style="text-transform:uppercase;color:var(--gold);font-weight:800;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
+          <input type="number" id="newPromoDiscount" class="form-input" placeholder="نسبة الخصم %" min="1" max="100" style="color:var(--gold);">
+          <input type="text" id="newPromoDesc" class="form-input" placeholder="وصف (مثال: خصم رمضان)" style="color:var(--gold);">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;" data-ar="عدد مرات الاستخدام (0 = لا محدود)" data-en="Max uses (0 = unlimited)">عدد مرات الاستخدام (0 = لا محدود)</label>
+              <input type="number" id="newPromoMaxUses" class="form-input" placeholder="0" min="0" value="0" style="color:var(--gold);">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block;" data-ar="تاريخ الانتهاء (اختياري)" data-en="Expiry date (optional)">تاريخ الانتهاء</label>
+              <input type="date" id="newPromoExpiry" class="form-input" style="color:var(--gold);colorscheme:dark;">
+            </div>
+          </div>
+          <button onclick="createPromoCode()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all 0.3s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1"><span data-ar="➕ إضافة الكود" data-en="➕ Add Code">➕ إضافة الكود</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: إضافة وجبات ===== -->
+    <div id="adminTab-menu" style="display:none">
+      <div style="background:var(--dark3);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold);">🍽️ <span data-ar="إضافة وجبة جديدة" data-en="Add New Item">إضافة وجبة جديدة</span></div>
+        <div style="display:grid;gap:12px;">
+          <input type="text" id="newItemNameAr" class="form-input" placeholder="اسم الوجبة بالعربي" style="color:var(--text);">
+          <input type="text" id="newItemNameEn" class="form-input" placeholder="Item name in English" style="color:var(--text);">
+          <input type="text" id="newItemCatAr" class="form-input" placeholder="الفئة بالعربي (مثال: المشاوي)" style="color:var(--text);">
+          <input type="text" id="newItemCatEn" class="form-input" placeholder="Category in English (e.g. Grills)" style="color:var(--text);">
+          <input type="number" id="newItemPrice" class="form-input" placeholder="السعر بالدينار (IQD)" style="color:var(--gold);" min="0">
+          <input type="url" id="newItemImage" class="form-input" placeholder="رابط صورة الوجبة (https://...)" style="color:var(--text);">
+          <div id="newItemImagePreview" style="display:none;border-radius:12px;overflow:hidden;height:160px;margin-top:4px;">
+            <img id="newItemPreviewImg" src="" style="width:100%;height:100%;object-fit:cover;" alt="preview">
+          </div>
+          <button onclick="previewNewItemImage()" style="padding:10px;background:var(--dark4);color:var(--muted);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">
+            👁️ <span data-ar="معاينة الصورة" data-en="Preview Image">معاينة الصورة</span>
+          </button>
+          <button onclick="addNewMenuItem()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;transition:all 0.3s;">
+            ➕ <span data-ar="إضافة الوجبة" data-en="Add Item">إضافة الوجبة</span>
+          </button>
+        </div>
+      </div>
+      <div style="background:var(--dark3);border:1px solid var(--border);border-radius:20px;padding:20px;">
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;font-weight:600;">📋 <span data-ar="الوجبات المضافة" data-en="Added Items">الوجبات المضافة</span></div>
+        <div id="adminMenuItemsList" style="display:grid;gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: خصم على وجبة ===== -->
+    <div id="adminTab-itemdiscount" style="display:none">
+      <div style="background:var(--dark3);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--gold);">🏷️ <span data-ar="خصم مباشر على وجبة" data-en="Direct Item Discount">خصم مباشر على وجبة</span></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;" data-ar="حدد نسبة خصم لكل وجبة — تظهر للزبون في المنيو مباشرة" data-en="Set discount % per item — shown to customer in menu">حدد نسبة خصم لكل وجبة — تظهر للزبون في المنيو مباشرة</div>
+        <input type="text" id="itemDiscountSearch" class="form-input" placeholder="🔍 ابحث عن وجبة..." style="margin-bottom:12px;" oninput="filterItemDiscountList(this.value)">
+        <div id="itemDiscountList" style="display:grid;gap:8px;max-height:500px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="profile-page" class="page">
+  <nav class="navbar">
+    <div class="nav-logo">LOKI</div>
+    <div class="nav-actions">
+      <button class="nav-btn nav-lang" onclick="toggleLang()">EN/AR</button>
+    </div>
+  </nav>
+  <div class="profile-hero">
+    <div class="profile-avatar-wrap">
+      <img id="profileAvatarImg" class="profile-avatar" src="" alt="" style="display:none" onerror="this.style.display='none';document.getElementById('profileAvatarPlaceholder').style.display='flex'">
+      <div id="profileAvatarPlaceholder" class="avatar-placeholder">👤</div>
+      <button class="avatar-edit-btn" onclick="document.getElementById('avatarFileInput').click()" title="تغيير الصورة">✏️</button>
+      <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+    </div>
+    <div class="profile-name" id="profileDisplayName">—</div>
+    <div class="profile-email" id="profileDisplayEmail">—</div>
+    <div id="profileRoleBadge" class="profile-role-badge role-customer">🍽️ زبون</div>
+  </div>
+
+  <div class="profile-top-offset">
+    <!-- معلومات الحساب -->
+    <div class="profile-card">
+      <div class="profile-card-title" data-ar="📋 معلومات الحساب" data-en="📋 Account Info">📋 معلومات الحساب</div>
+      <div class="profile-field">
+        <label class="profile-field-label" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label>
+        <input type="text" id="profileNameInput" class="profile-field-input" placeholder="">
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label" data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</label>
+        <input type="email" id="profileEmailInput" class="profile-field-input" placeholder="">
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label" data-ar="رقم الهاتف" data-en="Phone Number">رقم الهاتف</label>
+        <input type="tel" id="profilePhoneInput" class="profile-field-input" placeholder="+964 7XX XXX XXXX">
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label" data-ar="الموقع (نص أو رابط خرائط)" data-en="Location (text or Google Maps link)">الموقع</label>
+        <input type="text" id="profileLocationInput" class="profile-field-input" placeholder="مثال: بغداد، الكرادة أو رابط خرائط">
+      </div>
+      <div class="profile-field">
+        <label class="profile-field-label" data-ar="الرابط الشخصي" data-en="Personal Link">الرابط الشخصي</label>
+        <input type="url" id="profileLinkInput" class="profile-field-input" placeholder="https://...">
+      </div>
+      <button class="profile-save-btn" onclick="saveProfile()">
+        <span data-ar="💾 حفظ التغييرات" data-en="💾 Save Changes">💾 حفظ التغييرات</span>
+      </button>
+    </div>
+
+    <!-- تسجيل الخروج وحذف الحساب -->
+    <div class="profile-card">
+      <div class="profile-card-title" data-ar="⚙️ إعدادات الحساب" data-en="⚙️ Account Settings">⚙️ إعدادات الحساب</div>
+      <!-- زر المود -->
+      <button id="themeModeBtn" onclick="toggleThemeMode()" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--dark4);color:var(--text);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span id="themeModeIcon">☀️</span>
+        <span id="themeModeLabel" data-ar="مود النهار" data-en="Light Mode">مود النهار</span>
+      </button>
+      <button class="profile-logout-btn" onclick="logoutFromProfile()">
+        <span data-ar="🚪 تسجيل الخروج" data-en="🚪 Logout">🚪 تسجيل الخروج</span>
+      </button>
+      <button class="profile-delete-btn" onclick="deleteAccount()">
+        <span data-ar="🗑️ حذف الحساب نهائياً" data-en="🗑️ Delete Account Permanently">🗑️ حذف الحساب نهائياً</span>
+      </button>
+    </div>
+
+    <!-- زر الرجوع -->
+    <div style="padding:0 16px 16px;">
+      <button class="profile-logout-btn" onclick="goBackFromProfile()" style="color:var(--gold);border-color:var(--border);">
+        <span data-ar="← رجوع" data-en="← Back">← رجوع</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHAT MODAL ===== -->
+<div class="chat-modal" id="chatModal">
+  <div class="chat-box">
+    <div class="chat-header">
+      <div class="chat-title" id="chatTitle">💬 محادثة</div>
+      <button class="close-btn" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" class="chat-input"
+        placeholder="" onkeypress="if(event.key==='Enter')sendMsg()">
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  ⚡ SUPABASE CONFIG — غيّر هاي القيم بمفاتيحك
+// ============================================================
+const SUPABASE_URL = 'https://cekksxloqkmyzppifxyn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2tzeGxvcWtteXpwcGlmeHluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxOTkzOTMsImV4cCI6MjA5NDc3NTM5M30.k-XW8z7Y7CUv2cj-effJYBiKLMcsxIfyxaYJTE0mzbw';
+// ============================================================
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== STATE =====
+let currentUser = null;
+let currentProfile = null;
+let currentLang = 'ar';
+let selectedRole = 'customer';
+let isRegister = false;
+let cart = [];
+let allMenuItems = [];
+let currentFilter = 'all';
+let activeChatOrderId = null;
+let chatChannel = null;
+let waiterOrdersChannel = null;
+
+// ===== AUDIO =====
+function playClick() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    o.start(); o.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+document.addEventListener('click', function(e) {
+  playClick();
+  const btn = e.target.closest('button, .menu-card, .role-card');
+  if (!btn) return;
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+});
+
+// ===== LANG =====
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.body.classList.toggle('ltr', lang === 'en');
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-ar],[data-en]').forEach(el => {
+    const txt = el.getAttribute('data-'+lang);
+    if (txt) el.textContent = txt;
+  });
+  // تحديث الـ placeholders
+  document.querySelectorAll('[data-ar-placeholder],[data-en-placeholder]').forEach(el => {
+    const ph = el.getAttribute('data-'+lang+'-placeholder');
+    if (ph) el.placeholder = ph;
+  });
+  document.querySelectorAll('.lang-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&lang==='ar')||(i===1&&lang==='en')));
+  if (allMenuItems.length) {
+    renderCategories(allMenuItems);
+    renderMenu(allMenuItems);
+  }
+  // إعادة تحميل طلبات النادل عند تغيير اللغة
+  if (currentProfile && currentProfile.role === 'waiter') {
+    loadWaiterOrders();
+  }
+  updateChatPlaceholder();
+}
+function toggleLang() { setLang(currentLang === 'ar' ? 'en' : 'ar'); }
+
+// ===== SETTINGS DROPDOWN =====
+let soundEnabled = true;
+
+function toggleSettingsDropdown(e) {
+  e.stopPropagation();
+  // أغلق كل الـ dropdowns
+  document.querySelectorAll(".settings-dropdown").forEach(d => {
+    if (d !== e.target.closest(".settings-wrap").querySelector(".settings-dropdown")) {
+      d.classList.remove("open");
+    }
+  });
+  const wrap = e.target.closest(".settings-wrap");
+  const dropdown = wrap.querySelector(".settings-dropdown");
+  dropdown.classList.toggle("open");
+}
+
+function closeSettingsDropdown() {
+  document.querySelectorAll(".settings-dropdown").forEach(d => d.classList.remove("open"));
+}
+
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".settings-wrap")) closeSettingsDropdown();
+});
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const icons = document.querySelectorAll("#soundIcon");
+  const labels = document.querySelectorAll("#soundLabel");
+  icons.forEach(i => i.textContent = soundEnabled ? "🔊" : "🔇");
+  labels.forEach(l => {
+    l.setAttribute("data-ar", soundEnabled ? "الصوت: شغال" : "الصوت: مطفي");
+    l.setAttribute("data-en", soundEnabled ? "Sound: On" : "Sound: Off");
+    l.textContent = currentLang === "ar" ? (soundEnabled ? "الصوت: شغال" : "الصوت: مطفي") : (soundEnabled ? "Sound: On" : "Sound: Off");
+  });
+  showToast(soundEnabled ? t("🔊 الصوت شغال","🔊 Sound On") : t("🔇 الصوت مطفي","🔇 Sound Off"), "info");
+}
+function toggleThemeMode() {
+  const isLight = document.body.classList.toggle("light-mode");
+  const modeAr = isLight ? "مود الليل" : "مود النهار";
+  const modeEn = isLight ? "Dark Mode" : "Light Mode";
+  const modeIcon = isLight ? "🌙" : "☀️";
+  // زر البروفايل
+  const icon = document.getElementById("themeModeIcon");
+  const label = document.getElementById("themeModeLabel");
+  if (icon) icon.textContent = modeIcon;
+  if (label) { label.setAttribute("data-ar", modeAr); label.setAttribute("data-en", modeEn); label.textContent = currentLang === "ar" ? modeAr : modeEn; }
+  // أزرار الـ dropdown
+  document.querySelectorAll("#dropThemeIcon").forEach(el => el.textContent = modeIcon);
+  document.querySelectorAll("#dropThemeLabel").forEach(el => { el.setAttribute("data-ar", modeAr); el.setAttribute("data-en", modeEn); el.textContent = currentLang === "ar" ? modeAr : modeEn; });
+  localStorage.setItem("loki-theme", isLight ? "light" : "dark");
+}
+
+// تطبيق الثيم المحفوظ عند التحميل
+(function() {
+  if (localStorage.getItem("loki-theme") === "light") {
+    document.body.classList.add("light-mode");
+  }
+})();
+function t(ar, en) { return currentLang === 'ar' ? ar : en; }
+function updateChatPlaceholder() {
+  const ci = document.getElementById('chatInput');
+  if (ci) ci.placeholder = t('اكتب رسالة...', 'Type a message...');
+}
+
+// ===== AUTH MODE =====
+function selectRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  // إظهار/إخفاء خانة الكود حسب الدور
+  const codeGroup = document.getElementById('waiterCodeGroup');
+  if (codeGroup) codeGroup.style.display = (role === 'waiter' && isRegister) ? 'block' : 'none';
+}
+
+function toggleAuthMode() {
+  isRegister = !isRegister;
+  const nameInput = document.getElementById('nameInput');
+  const toggleBtn = document.getElementById('toggleBtnText');
+  const authBtn = document.getElementById('authBtn').querySelector('span');
+  const codeGroup = document.getElementById('waiterCodeGroup');
+  if (isRegister) {
+    nameInput.style.display = 'block';
+    nameInput.placeholder = t('أدخل اسمك الكامل', 'Enter your full name');
+    toggleBtn.setAttribute('data-ar', 'لديك حساب؟ سجل دخول');
+    toggleBtn.setAttribute('data-en', 'Have an account? Sign In');
+    authBtn.setAttribute('data-ar', 'إنشاء حساب');
+    authBtn.setAttribute('data-en', 'Register');
+    if (codeGroup) codeGroup.style.display = selectedRole === 'waiter' ? 'block' : 'none';
+  } else {
+    nameInput.style.display = 'none';
+    if (codeGroup) codeGroup.style.display = 'none';
+    toggleBtn.setAttribute('data-ar', 'ليس لديك حساب؟ سجل الآن');
+    toggleBtn.setAttribute('data-en', 'No account? Register');
+    authBtn.setAttribute('data-ar', 'دخول');
+    authBtn.setAttribute('data-en', 'Sign In');
+  }
+  setLang(currentLang);
+}
+
+// ===== AUTH =====
+async function handleAuth() {
+  const email = document.getElementById('emailInput').value.trim();
+  const pass = document.getElementById('passInput').value;
+  const name = document.getElementById('nameInput').value.trim();
+  if (!email || !pass) { showToast(t('أدخل الإيميل وكلمة المرور','Enter email & password'), 'error'); return; }
+
+  const btn = document.getElementById('authBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span>';
+
+  try {
+    if (isRegister) {
+      if (!name) { showToast(t('أدخل اسمك','Enter your name'), 'error'); btn.disabled=false; setLang(currentLang); return; }
+
+      if (selectedRole === 'waiter') {
+        const code = (document.getElementById('waiterCodeInline')?.value || '').trim().toUpperCase();
+        if (!code) { showToast(t('أدخل كود النادل','Enter waiter code'), 'error'); btn.disabled=false; setLang(currentLang); return; }
+
+        // كود المدير
+        if (code === ADMIN_CODE) {
+          const { error: e } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name, role: 'admin', language: currentLang } } });
+          if (e) throw e;
+          showToast(t('✅ تم إنشاء حساب المدير! سجل دخول الآن','✅ Admin account created! Sign in now'), 'success');
+          toggleAuthMode();
+          btn.disabled=false; setLang(currentLang); return;
+        }
+
+        // كود نادل عادي
+        const { data: codeData } = await sb.from('waiter_codes').select('*').eq('code', code).single();
+        if (!codeData) { showToast(t('الكود غير صحيح','Invalid code'), 'error'); btn.disabled=false; setLang(currentLang); return; }
+        if (codeData.used) { showToast(t('هذا الكود مستخدم مسبقاً','Code already used'), 'error'); btn.disabled=false; setLang(currentLang); return; }
+
+        const { error: e2 } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name, role: 'waiter', language: currentLang } } });
+        if (e2) throw e2;
+        await sb.from('waiter_codes').update({ used: true }).eq('code', code);
+        showToast(t('✅ تم إنشاء حساب النادل! سجل دخول الآن','✅ Waiter account created! Sign in now'), 'success');
+        toggleAuthMode();
+        btn.disabled=false; setLang(currentLang); return;
+      }
+
+      // زبون عادي
+      const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name, role: selectedRole, language: currentLang } } });
+      if (error) throw error;
+      showToast(t('✅ تم إنشاء الحساب! سجل دخول الآن','✅ Account created! Sign in now'), 'success');
+      toggleAuthMode();
+
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+      // انتظر ثانية عشان الـ Trigger يكمل
+      await new Promise(r => setTimeout(r, 1000));
+      await loadProfile(data.user);
+    }
+  } catch(e) {
+    const msg = e.message.includes('Invalid') ? t('إيميل أو كلمة مرور خاطئة','Wrong email or password') :
+                e.message.includes('Email not confirmed') ? t('تحقق من إيميلك أولاً','Please verify your email first') :
+                e.message.includes('already registered') ? t('هذا الإيميل مسجل مسبقاً، سجل دخول','Email already registered, sign in') :
+                e.message.includes('422') ? t('هذا الإيميل مسجل مسبقاً، سجل دخول','Email already registered, sign in') :
+                e.message;
+    showToast(msg, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span data-ar="${isRegister?'إنشاء حساب':'دخول'}" data-en="${isRegister?'Register':'Sign In'}">${isRegister?t('إنشاء حساب','Register'):t('دخول','Sign In')}</span>`;
+  }
+}
+
+async function loadProfile(user) {
+  currentUser = user;
+  let { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+
+  if (!data) {
+    const meta = user.user_metadata || {};
+    const role = ['customer','waiter','admin'].includes(meta.role) ? meta.role : 'customer';
+    const full_name = meta.full_name || 'مستخدم';
+    const language = meta.language || 'ar';
+    const { data: newProfile, error: insertError } = await sb.from('profiles')
+      .insert({ id: user.id, full_name, role, language })
+      .select().single();
+    if (insertError || !newProfile) {
+      showToast(t('خطأ في إنشاء الملف الشخصي','Error creating profile'), 'error');
+      return;
+    }
+    data = newProfile;
+  }
+
+  currentProfile = data;
+  if (data.language) setLang(data.language);
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('landing').style.display = 'none';
+  if (data.role === 'admin') showAdminPage();
+  else if (data.role === 'waiter') showWaiterPage();
+  else showCustomerPage();
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  cart = [];
+  if (waiterOrdersChannel) sb.removeChannel(waiterOrdersChannel);
+  // إعادة إظهار صفحة الهبوط قبل showPage
+  const landingEl = document.getElementById('landing');
+  if (landingEl) landingEl.style.display = '';
+  showPage('landing');
+  showToast(t('تم تسجيل الخروج','Logged out'), 'info');
+}
+
+// ===== PAGES =====
+function showPage(id) {
+  // نرجع كل الصفحات من الـ wrapper لـ body
+  const wrapper = document.getElementById('splitWrapper');
+  if (wrapper) {
+    Array.from(wrapper.children).forEach(child => {
+      document.body.insertBefore(child, wrapper);
+    });
+    wrapper.remove();
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById(id);
+  if (pg) {
+    pg.classList.add('active');
+    pg.classList.add('fade-in');
+  }
+}
+
+function showCustomerPage() {
+  showPage('customer-page');
+  document.getElementById('greetMsg').textContent = t(`أهلاً ${currentProfile.full_name}! اختر ما يشهيك 😋`, `Hello ${currentProfile.full_name}! Choose your favorites 😋`);
+  loadMenu();
+}
+
+function showWaiterPage() {
+  // إظهار الصفحتين جنب بعض
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const customerPg = document.getElementById('customer-page');
+  const waiterPg = document.getElementById('waiter-page');
+  
+  // نضيف wrapper للـ split layout
+  let wrapper = document.getElementById('splitWrapper');
+  if (!wrapper) {
+    wrapper = document.createElement('div');
+    wrapper.id = 'splitWrapper';
+    wrapper.className = 'split-layout';
+    document.body.appendChild(wrapper);
+  }
+  
+  // نحرك الصفحتين للـ wrapper
+  wrapper.appendChild(customerPg);
+  wrapper.appendChild(waiterPg);
+  wrapper.style.display = 'grid';
+  
+  customerPg.classList.add('active');
+  waiterPg.classList.add('active');
+  
+  // نحمل المنيو للزبون وطلبات النادل
+  loadMenu();
+  document.getElementById('greetMsg').textContent = t('عرض مباشر للمنيو 👁️', 'Live Menu View 👁️');
+  loadWaiterOrders();
+  subscribeWaiterOrders();
+}
+
+function showSubPage(sub) {
+  if (sub === 'menu') {
+    showPage('customer-page');
+    document.getElementById('menuNavBtn')?.classList.add('active');
+    document.getElementById('menuNavBtn2')?.classList.add('active');
+    document.getElementById('ordersNavBtn')?.classList.remove('active');
+    document.getElementById('ordersNavBtn2')?.classList.remove('active');
+  } else {
+    showPage('orders-page');
+    loadMyOrders();
+    document.getElementById('ordersNavBtn')?.classList.add('active');
+    document.getElementById('ordersNavBtn2')?.classList.add('active');
+    document.getElementById('menuNavBtn')?.classList.remove('active');
+    document.getElementById('menuNavBtn2')?.classList.remove('active');
+  }
+}
+
+// ===== MENU =====
+// بيانات المنيو الجديدة من قائمة مطعم الوجبة السريعة
+const LOCAL_MENU = [
+  // المشاوي
+  { id:'1', name_ar:'نفر كباب خشخاش', name_en:'Khashkhash Kabab', category_ar:'المشاوي', category_en:'Grills', price:15000, image_url:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&q=80', available:true },
+  { id:'2', name_ar:'نفر كباب بالمكسرات', name_en:'Nuts Kabab', category_ar:'المشاوي', category_en:'Grills', price:16000, image_url:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', available:true },
+  { id:'3', name_ar:'نفر كباب قمر الزمان', name_en:'Qamar Al-Zaman Kabab', category_ar:'المشاوي', category_en:'Grills', price:18000, image_url:'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80', available:true },
+  { id:'4', name_ar:'نفر تكة لحم', name_en:'Lamb Tika', category_ar:'المشاوي', category_en:'Grills', price:14000, image_url:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80', available:true },
+  { id:'5', name_ar:'نفر تكة دجاج', name_en:'Chicken Tika', category_ar:'المشاوي', category_en:'Grills', price:12000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'6', name_ar:'نفر معالك', name_en:'Maalak', category_ar:'المشاوي', category_en:'Grills', price:14000, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'7', name_ar:'نفر مشكل مشاوي', name_en:'Mixed Grill', category_ar:'المشاوي', category_en:'Grills', price:15000, image_url:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', available:true },
+  { id:'8', name_ar:'نفر شيش طاووق', name_en:'Shish Tawook', category_ar:'المشاوي', category_en:'Grills', price:14000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'9', name_ar:'دجاج مسحب على الفحم مع الثمن', name_en:'Grilled Chicken with Garlic', category_ar:'المشاوي', category_en:'Grills', price:12000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'10', name_ar:'عرايس لحم', name_en:'Lamb Arayes', category_ar:'المشاوي', category_en:'Grills', price:10000, image_url:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80', available:true },
+  { id:'11', name_ar:'عرايس دجاج', name_en:'Chicken Arayes', category_ar:'المشاوي', category_en:'Grills', price:10000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'12', name_ar:'طبق مشاوي الوجبة السريعة', name_en:'Fast Food Mixed Grill Plate', category_ar:'المشاوي', category_en:'Grills', price:25000, image_url:'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80', available:true },
+  { id:'13', name_ar:'كيلو كباب لحم', name_en:'Kilo Lamb Kabab', category_ar:'المشاوي', category_en:'Grills', price:25000, image_url:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&q=80', available:true },
+  { id:'14', name_ar:'كيلو كباب دجاج', name_en:'Kilo Chicken Kabab', category_ar:'المشاوي', category_en:'Grills', price:20000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'15', name_ar:'كيلو مشاوي مشكل', name_en:'Kilo Mixed Grill', category_ar:'المشاوي', category_en:'Grills', price:30000, image_url:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', available:true },
+
+  // الدجاج المشوي
+  { id:'16', name_ar:'دجاج تركي', name_en:'Turkish Chicken', category_ar:'الدجاج المشوي', category_en:'Grilled Chicken', price:10000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'17', name_ar:'نصف دجاج تركي', name_en:'Half Turkish Chicken', category_ar:'الدجاج المشوي', category_en:'Grilled Chicken', price:6000, image_url:'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80', available:true },
+
+  // الكنتاكي
+  { id:'18', name_ar:'وجبة كنتاكي 5 قطع', name_en:'Kentaki 5 Pieces', category_ar:'الكنتاكي', category_en:'Fried Chicken', price:10000, image_url:'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&q=80', available:true },
+  { id:'19', name_ar:'وجبة كنتاكي 6 قطع', name_en:'Kentaki 6 Pieces', category_ar:'الكنتاكي', category_en:'Fried Chicken', price:11000, image_url:'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&q=80', available:true },
+  { id:'20', name_ar:'وجبة كنتاكي 10 قطع', name_en:'Kentaki 10 Pieces', category_ar:'الكنتاكي', category_en:'Fried Chicken', price:17000, image_url:'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&q=80', available:true },
+  { id:'21', name_ar:'وجبة كنتاكي 12 قطعة', name_en:'Kentaki 12 Pieces', category_ar:'الكنتاكي', category_en:'Fried Chicken', price:20000, image_url:'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&q=80', available:true },
+  { id:'22', name_ar:'وجبة سترسز 5 قطع', name_en:'Stressz 5 Pieces', category_ar:'الكنتاكي', category_en:'Fried Chicken', price:6000, image_url:'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=80', available:true },
+
+  // الريزو
+  { id:'23', name_ar:'ريزو نورمال', name_en:'Normal Risotto', category_ar:'الريزو', category_en:'Risotto', price:6000, image_url:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80', available:true },
+  { id:'24', name_ar:'ريزو مدخن', name_en:'Smoked Risotto', category_ar:'الريزو', category_en:'Risotto', price:5000, image_url:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80', available:true },
+  { id:'25', name_ar:'ريزو جبن', name_en:'Cheese Risotto', category_ar:'الريزو', category_en:'Risotto', price:6000, image_url:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80', available:true },
+  { id:'26', name_ar:'ريزو مطافي', name_en:'Mutafi Risotto', category_ar:'الريزو', category_en:'Risotto', price:5000, image_url:'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80', available:true },
+
+  // الشاورما
+  { id:'27', name_ar:'نفر شاورما لحم 300غم', name_en:'Lamb Shawarma 300g', category_ar:'الشاورما', category_en:'Shawarma', price:10000, image_url:'https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80', available:true },
+  { id:'28', name_ar:'نصف نفر شاورما لحم 150غم', name_en:'Half Lamb Shawarma 150g', category_ar:'الشاورما', category_en:'Shawarma', price:5000, image_url:'https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80', available:true },
+  { id:'29', name_ar:'نفر شاورما دجاج 300غم', name_en:'Chicken Shawarma 300g', category_ar:'الشاورما', category_en:'Shawarma', price:10000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'30', name_ar:'نصف نفر شاورما دجاج 150غم', name_en:'Half Chicken Shawarma 150g', category_ar:'الشاورما', category_en:'Shawarma', price:5000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'31', name_ar:'كيلو شاورما لحم', name_en:'Kilo Lamb Shawarma', category_ar:'الشاورما', category_en:'Shawarma', price:35000, image_url:'https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80', available:true },
+  { id:'32', name_ar:'نصف كيلو شاورما لحم', name_en:'Half Kilo Lamb Shawarma', category_ar:'الشاورما', category_en:'Shawarma', price:17500, image_url:'https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80', available:true },
+  { id:'33', name_ar:'كيلو شاورما دجاج', name_en:'Kilo Chicken Shawarma', category_ar:'الشاورما', category_en:'Shawarma', price:30000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'34', name_ar:'نصف كيلو شاورما دجاج', name_en:'Half Kilo Chicken Shawarma', category_ar:'الشاورما', category_en:'Shawarma', price:15000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+
+  // الساندويتش
+  { id:'35', name_ar:'شاورما لحم', name_en:'Lamb Shawarma Sandwich', category_ar:'الساندويتش', category_en:'Sandwiches', price:2500, image_url:'https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80', available:true },
+  { id:'36', name_ar:'شاورما دجاج', name_en:'Chicken Shawarma Sandwich', category_ar:'الساندويتش', category_en:'Sandwiches', price:2500, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'37', name_ar:'برجر لحم', name_en:'Lamb Burger', category_ar:'الساندويتش', category_en:'Sandwiches', price:2500, image_url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', available:true },
+  { id:'38', name_ar:'برجر دجاج', name_en:'Chicken Burger', category_ar:'الساندويتش', category_en:'Sandwiches', price:2500, image_url:'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=400&q=80', available:true },
+  { id:'39', name_ar:'البرجر العراقي', name_en:'Iraqi Burger', category_ar:'الساندويتش', category_en:'Sandwiches', price:3500, image_url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', available:true },
+  { id:'40', name_ar:'برجر بالجبن', name_en:'Cheese Burger', category_ar:'الساندويتش', category_en:'Sandwiches', price:3000, image_url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', available:true },
+  { id:'41', name_ar:'دجاج إيطالي متبل', name_en:'Spiced Italian Chicken', category_ar:'الساندويتش', category_en:'Sandwiches', price:3000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'42', name_ar:'كباب', name_en:'Kabab Sandwich', category_ar:'الساندويتش', category_en:'Sandwiches', price:3500, image_url:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&q=80', available:true },
+  { id:'43', name_ar:'زنجر', name_en:'Zinger', category_ar:'الساندويتش', category_en:'Sandwiches', price:3500, image_url:'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=80', available:true },
+  { id:'44', name_ar:'كرسبي', name_en:'Crispy', category_ar:'الساندويتش', category_en:'Sandwiches', price:3500, image_url:'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=80', available:true },
+
+  // الصاج
+  { id:'45', name_ar:'صاج شاورما لحم', name_en:'Lamb Shawarma Saj', category_ar:'الصاج', category_en:'Saj', price:3000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'46', name_ar:'صاج شاورما دجاج', name_en:'Chicken Shawarma Saj', category_ar:'الصاج', category_en:'Saj', price:3000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'47', name_ar:'صاج بركر لحم', name_en:'Lamb Burger Saj', category_ar:'الصاج', category_en:'Saj', price:3000, image_url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', available:true },
+  { id:'48', name_ar:'صاج بركر دجاج', name_en:'Chicken Burger Saj', category_ar:'الصاج', category_en:'Saj', price:3000, image_url:'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=400&q=80', available:true },
+  { id:'49', name_ar:'صاج كباب', name_en:'Kabab Saj', category_ar:'الصاج', category_en:'Saj', price:3500, image_url:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&q=80', available:true },
+  { id:'50', name_ar:'صاج سكالوب', name_en:'Escalope Saj', category_ar:'الصاج', category_en:'Saj', price:3500, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'51', name_ar:'صاج دجاج ايطالي متبل', name_en:'Spiced Italian Chicken Saj', category_ar:'الصاج', category_en:'Saj', price:3500, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'52', name_ar:'صاج مشكل', name_en:'Mixed Saj', category_ar:'الصاج', category_en:'Saj', price:3500, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+
+  // البيتزا
+  { id:'53', name_ar:'بيتزا مشكل (صغيرة)', name_en:'Mixed Pizza (Small)', category_ar:'البيتزا', category_en:'Pizza', price:8000, image_url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', available:true },
+  { id:'54', name_ar:'بيتزا مشكل (وسط)', name_en:'Mixed Pizza (Medium)', category_ar:'البيتزا', category_en:'Pizza', price:10000, image_url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', available:true },
+  { id:'55', name_ar:'بيتزا مشكل (كبيرة)', name_en:'Mixed Pizza (Large)', category_ar:'البيتزا', category_en:'Pizza', price:15000, image_url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', available:true },
+  { id:'56', name_ar:'بيتزا خضار', name_en:'Veggie Pizza', category_ar:'البيتزا', category_en:'Pizza', price:10000, image_url:'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80', available:true },
+  { id:'57', name_ar:'بيتزا صوصج', name_en:'Sausage Pizza', category_ar:'البيتزا', category_en:'Pizza', price:10000, image_url:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', available:true },
+  { id:'58', name_ar:'بيتزا الفصول الأربعة', name_en:'Four Seasons Pizza', category_ar:'البيتزا', category_en:'Pizza', price:10000, image_url:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', available:true },
+  { id:'59', name_ar:'بيتزا بيروني', name_en:'Pepperoni Pizza', category_ar:'البيتزا', category_en:'Pizza', price:10000, image_url:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', available:true },
+
+  // الصاج الإيطالي
+  { id:'60', name_ar:'صاج إيطالي لحم', name_en:'Italian Lamb Saj', category_ar:'الصاج الإيطالي', category_en:'Italian Saj', price:5000, image_url:'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80', available:true },
+  { id:'61', name_ar:'صاج إيطالي دجاج', name_en:'Italian Chicken Saj', category_ar:'الصاج الإيطالي', category_en:'Italian Saj', price:5000, image_url:'https://images.unsplash.com/photo-1606471191009-63994c53433b?w=400&q=80', available:true },
+  { id:'62', name_ar:'لغم برجر', name_en:'Landmine Burger', category_ar:'الصاج الإيطالي', category_en:'Italian Saj', price:6000, image_url:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', available:true },
+
+  // المقبلات والسلطات
+  { id:'63', name_ar:'طبق مقبلات مشكل صغير', name_en:'Small Mixed Appetizer', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:2000, image_url:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80', available:true },
+  { id:'64', name_ar:'طبق مقبلات مشكل وسط', name_en:'Medium Mixed Appetizer', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:3000, image_url:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80', available:true },
+  { id:'65', name_ar:'طبق مقبلات مشكل كبير', name_en:'Large Mixed Appetizer', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:5000, image_url:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80', available:true },
+  { id:'66', name_ar:'سلطة سيزر', name_en:'Caesar Salad', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:4000, image_url:'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400&q=80', available:true },
+  { id:'67', name_ar:'مشروبات غازية', name_en:'Soft Drinks', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:500, image_url:'https://images.unsplash.com/photo-1527960471264-932f39eb5846?w=400&q=80', available:true },
+  { id:'68', name_ar:'مي', name_en:'Water', category_ar:'المقبلات والسلطات', category_en:'Appetizers', price:500, image_url:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80', available:true },
+
+  // القسم الشرقي
+  { id:'69', name_ar:'قوزي لحم', name_en:'Lamb Gozi', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:18000, image_url:'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=400&q=80', available:true },
+  { id:'70', name_ar:'قوزي الشام', name_en:'Shami Gozi', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:20000, image_url:'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=400&q=80', available:true },
+  { id:'71', name_ar:'تشريب لحم مع رز', name_en:'Lamb Tashreeb with Rice', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:18000, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'72', name_ar:'دليمية لحم', name_en:'Lamb Dulaimiya', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:18000, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'73', name_ar:'مندي لحم', name_en:'Lamb Mandi', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:20000, image_url:'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=400&q=80', available:true },
+  { id:'74', name_ar:'مندي دجاج حبة كاملة', name_en:'Whole Chicken Mandi', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:20000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'75', name_ar:'مندي دجاج نصف حبة', name_en:'Half Chicken Mandi', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:10000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'76', name_ar:'رز ومرق', name_en:'Rice and Broth', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:3500, image_url:'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&q=80', available:true },
+  { id:'77', name_ar:'ربع دجاج مع رز ومرق', name_en:'Quarter Chicken with Rice', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:7000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'78', name_ar:'تشاورما مع رز ومرق', name_en:'Shawarma with Rice', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:7000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'79', name_ar:'سمك فيليه مع رز احمر', name_en:'Fish Fillet with Red Rice', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:6000, image_url:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&q=80', available:true },
+  { id:'80', name_ar:'صينية الوجبة السريعة سبشل', name_en:'Fast Food Special Tray', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:25000, image_url:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80', available:true },
+  { id:'81', name_ar:'دليمية نفر', name_en:'Dulaimiya Per Person', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:4000, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'82', name_ar:'طبق دولمة', name_en:'Dolma Plate', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:5000, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'83', name_ar:'تشريب شاورما مع رز', name_en:'Shawarma Tashreeb with Rice', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:10000, image_url:'https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=400&q=80', available:true },
+  { id:'84', name_ar:'دليمية مع دجاجة كاملة', name_en:'Dulaimiya with Whole Chicken', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:17000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'85', name_ar:'دليمية مع نصف دجاج', name_en:'Dulaimiya with Half Chicken', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:11000, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'86', name_ar:'دليمية مع ربع دجاج', name_en:'Dulaimiya with Quarter Chicken', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:8500, image_url:'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=400&q=80', available:true },
+  { id:'87', name_ar:'طبق رز إضافي', name_en:'Extra Rice Plate', category_ar:'القسم الشرقي', category_en:'Eastern Dishes', price:2000, image_url:'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400&q=80', available:true },
+
+  // السوربة والمقبلات الشرقية
+  { id:'88', name_ar:'شوربة عدس', name_en:'Lentil Soup', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:2500, image_url:'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80', available:true },
+  { id:'89', name_ar:'كبة سراي', name_en:'Saray Kubba', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:3500, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'90', name_ar:'باقلاء بالدهن الحر', name_en:'Broad Beans', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:3500, image_url:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80', available:true },
+  { id:'91', name_ar:'جلفراي', name_en:'Jalfraie', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:3500, image_url:'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80', available:true },
+  { id:'92', name_ar:'باسطرمة بالبيض', name_en:'Pastrami with Eggs', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:5000, image_url:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80', available:true },
+  { id:'93', name_ar:'مخلمة عروك', name_en:'Arouk Makhlama', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:3500, image_url:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80', available:true },
+  { id:'94', name_ar:'بيض وبطاطا', name_en:'Eggs and Potatoes', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:3000, image_url:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80', available:true },
+  { id:'95', name_ar:'اومليت بيض', name_en:'Egg Omelette', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:2500, image_url:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80', available:true },
+  { id:'96', name_ar:'مخلمة كباب لحم', name_en:'Lamb Kabab Makhlama', category_ar:'الشوربة والإضافات', category_en:'Soup & Extras', price:5000, image_url:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&q=80', available:true },
+
+  // البطاطا
+  { id:'97', name_ar:'بطاطا مقلية صغيرة', name_en:'Small Fries', category_ar:'البطاطا', category_en:'Fries', price:1000, image_url:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80', available:true },
+  { id:'98', name_ar:'بطاطا مقلية كبيرة', name_en:'Large Fries', category_ar:'البطاطا', category_en:'Fries', price:2000, image_url:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80', available:true },
+];
+
+async function loadMenu() {
+  // استخدم البيانات المحلية مباشرة (يمكن تغييرها لـ Supabase لاحقاً)
+  try {
+    const { data } = await sb.from('menu_items').select('*').eq('available', true);
+    if (data && data.length > 0) {
+      allMenuItems = data;
+    } else {
+      allMenuItems = LOCAL_MENU;
+    }
+  } catch(e) {
+    allMenuItems = LOCAL_MENU;
+  }
+  renderCategories(allMenuItems);
+  renderMenu(allMenuItems);
+}
+
+function renderCategories(items) {
+  const cats = ['all', ...new Set(items.map(i => currentLang === 'ar' ? i.category_ar : i.category_en))];
+  const row = document.getElementById('categoriesRow');
+  row.innerHTML = cats.map(c => `
+    <button class="cat-btn ${c==='all'?'active':''}" onclick="filterMenu('${c}',this)">
+      ${c === 'all' ? t('الكل','All') : c}
+    </button>`).join('');
+}
+
+function filterMenu(cat, el) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = cat === 'all' ? allMenuItems :
+    allMenuItems.filter(i => (currentLang==='ar'?i.category_ar:i.category_en) === cat);
+  renderMenu(filtered);
+}
+
+function renderMenu(items) {
+  const grid = document.getElementById('menuGrid');
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-icon">🍽️</div>
+      <div class="empty-state-text">${t('لا توجد أصناف','No items found')}</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = items.map((item, idx) => {
+    const hasDiscount = item.discount && item.discount > 0;
+    const discountedPrice = hasDiscount ? Math.round(item.price * (1 - item.discount / 100)) : null;
+    return `
+    <div class="menu-card card-anim" style="animation-delay:${idx*0.05}s">
+      ${item.image_url
+        ? `<img class="card-img" src="${item.image_url}" alt="${item.name_ar}" loading="lazy" onerror="this.parentElement.querySelector('.card-img-placeholder').style.display='flex';this.style.display='none'">`
+        : ''
+      }
+      <div class="card-img-placeholder" style="display:${item.image_url?'none':'flex'}">🍽️</div>
+      ${hasDiscount ? `<div style="position:absolute;top:8px;${currentLang==='ar'?'right':'left'}:8px;background:var(--red);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:50px;z-index:2;">-${item.discount}%</div>` : ''}
+      <div class="card-body">
+        <div class="card-name">${currentLang==='ar' ? item.name_ar : item.name_en}</div>
+        <div class="card-cat">${currentLang==='ar' ? item.category_ar : item.category_en}</div>
+        <div class="card-footer">
+          <div>
+            ${hasDiscount
+              ? `<div style="font-size:11px;color:var(--muted);text-decoration:line-through;line-height:1.2;">${item.price} IQD</div>
+                 <div class="card-price" style="color:var(--green);">${discountedPrice} <span>IQD</span></div>`
+              : `<div class="card-price">${item.price} <span>IQD</span></div>`
+            }
+          </div>
+          <button class="add-btn" onclick="addToCart('${item.id}');event.stopPropagation()">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== CART =====
+function addToCart(itemId) {
+  const item = allMenuItems.find(i => i.id === itemId);
+  if (!item) return;
+  const ex = cart.find(c => c.id === itemId);
+  // احسب السعر بعد الخصم
+  const finalPrice = (item.discount && item.discount > 0)
+    ? Math.round(item.price * (1 - item.discount / 100))
+    : item.price;
+  if (ex) ex.qty++;
+  else cart.push({ ...item, price: finalPrice, qty: 1 });
+  updateCartBadge();
+  showToast(t(`✅ أُضيف: ${item.name_ar}`, `✅ Added: ${item.name_en}`), 'success');
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s,i) => s + i.qty, 0);
+  // حدث كل badges
+  ['cartBadge','cartBadge2'].forEach(id => {
+    const badge = document.getElementById(id);
+    if (badge) { badge.textContent = total; badge.classList.toggle('show', total > 0); }
+  });
+}
+
+function toggleCart() {
+  const drawer = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('cartOverlay');
+  const isOpen = drawer.classList.contains('open');
+  if (!isOpen) renderCartItems();
+  drawer.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+}
+
+function closeCart() {
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
+}
+
+function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  if (!cart.length) {
+    container.innerHTML = `<div class="empty-cart">
+      <div class="empty-icon">🛒</div>
+      <div>${t('السلة فارغة','Cart is empty')}</div>
+    </div>`;
+    totalEl.textContent = '0 IQD';
+    return;
+  }
+  container.innerHTML = cart.map(item => `
+    <div class="drawer-item">
+      ${item.image_url ? `<img class="item-img" src="${item.image_url}" alt="">` : '<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:24px">🍽️</div>'}
+      <div class="item-info">
+        <div class="item-name">${currentLang==='ar'?item.name_ar:item.name_en}</div>
+        <div class="item-price">${item.price * item.qty} IQD</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+        </div>
+      </div>
+      <button class="item-del" onclick="removeFromCart('${item.id}')">🗑️</button>
+    </div>`).join('');
+  updateCartTotal();
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCartItems();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCartItems();
+}
+
+async function placeOrder() {
+  if (!cart.length) { showToast(t('السلة فارغة!','Cart is empty!'), 'error'); return; }
+
+  // فحص العنوان
+  if (!currentProfile?.location || currentProfile.location.trim().length < 3) {
+    showAddressRequiredModal();
+    return;
+  }
+
+  const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const discountAmt = appliedPromo ? Math.round(subtotal * appliedPromo.discount / 100) : 0;
+  const total = subtotal - discountAmt;
+  try {
+    const { data: order, error: oErr } = await sb.from('orders').insert({
+      customer_id: currentUser.id,
+      total,
+      promo_code: appliedPromo ? appliedPromo.code : null,
+      promo_discount: discountAmt,
+      status: 'pending',
+      customer_location: currentProfile.location || null
+    }).select().single();
+    if (oErr) throw oErr;
+    const items = cart.map(i => ({ order_id: order.id, menu_item_id: i.id, quantity: i.qty, price: i.price }));
+    const { error: iErr } = await sb.from('order_items').insert(items);
+    if (iErr) throw iErr;
+    cart = [];
+    updateCartBadge();
+    resetPromo();
+    closeCart();
+    showToast(t('✅ تم تسجيل طلبك! سينتظر موافقة النادل','✅ Order placed! Waiting for waiter approval'), 'success');
+  } catch(e) {
+    showToast(t('حدث خطأ: ','Error: ') + e.message, 'error');
+  }
+}
+
+// ===== MY ORDERS =====
+async function loadMyOrders() {
+  const { data: orders } = await sb.from('orders').select('*').eq('customer_id', currentUser.id).order('created_at', { ascending: false });
+  const list = document.getElementById('ordersList');
+  if (!orders || !orders.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">${t('لا توجد طلبات','No orders yet')}</div></div>`;
+    return;
+  }
+  const statusLabels = {
+    ar: { pending:'قيد الانتظار', accepted:'تم القبول', rejected:'مرفوض', delivered:'تم التسليم' },
+    en: { pending:'Pending', accepted:'Accepted', rejected:'Rejected', delivered:'Delivered' }
+  };
+  let html = '';
+  for (const order of orders) {
+    const { data: items } = await sb.from('order_items').select('*, menu_items(name_ar,name_en)').eq('order_id', order.id);
+    const statusClass = `status-${order.status}`;
+    const statusText = statusLabels[currentLang][order.status] || order.status;
+    const canEdit = order.status === 'pending';
+    html += `
+    <div class="order-card" id="order-${order.id}">
+      <div class="order-header">
+        <div>
+          <div class="order-id">#${order.id.slice(0,8).toUpperCase()}</div>
+          <div class="order-date">${new Date(order.created_at).toLocaleDateString(currentLang==='ar'?'ar-IQ':'en-US')}</div>
+        </div>
+        <span class="status-badge ${statusClass}">${statusText}</span>
+      </div>
+      <div class="order-items-list">
+        ${(items||[]).map(i => `
+          <div class="oi-row">
+            <span class="oi-name">${currentLang==='ar'?i.menu_items.name_ar:i.menu_items.name_en}</span>
+            <span class="oi-qty">×${i.quantity}</span>
+            <span class="oi-price">${i.price * i.quantity} IQD</span>
+          </div>`).join('')}
+      </div>
+      <div class="order-total-row">
+        <span>${t('المجموع','Total')}</span>
+        <strong style="color:var(--gold);font-size:18px">${order.total} IQD</strong>
+      </div>
+      <div class="order-actions ${canEdit?'':'hidden'}">
+        <button class="btn-sm btn-delete" onclick="deleteOrder('${order.id}')">🗑️ ${t('حذف الطلب','Delete Order')}</button>
+        <button class="btn-sm btn-chat" onclick="openChat('${order.id}','${currentProfile.full_name}')">💬 ${t('مراسلة النادل','Chat with Waiter')}</button>
+      </div>
+      ${!canEdit ? `<div class="order-actions"><button class="btn-sm btn-chat" onclick="openChat('${order.id}','${currentProfile.full_name}')">💬 ${t('مراسلة النادل','Chat with Waiter')}</button></div>` : ''}
+    </div>`;
+  }
+  list.innerHTML = html;
+}
+
+async function deleteOrder(orderId) {
+  if (!confirm(t('هل تريد حذف الطلب؟','Delete this order?'))) return;
+  await sb.from('orders').delete().eq('id', orderId).eq('status', 'pending');
+  showToast(t('تم حذف الطلب','Order deleted'), 'info');
+  loadMyOrders();
+}
+
+// ===== WAITER =====
+async function loadWaiterOrders() {
+  const { data: orders, error: ordersError } = await sb.from('orders').select('*').in('status',['pending','accepted']).order('created_at', { ascending: false });
+  const grid = document.getElementById('waiterGrid');
+  if (ordersError || !orders || !orders.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🎉</div><div class="empty-state-text">${t('لا توجد طلبات جديدة','No new orders')}</div></div>`;
+    return;
+  }
+  // جلب أسماء الزبائن بشكل منفصل
+  const customerIds = [...new Set(orders.map(o => o.customer_id).filter(Boolean))];
+  const { data: profiles } = await sb.from('profiles').select('id, full_name').in('id', customerIds);
+  const profileMap = {};
+  (profiles||[]).forEach(p => profileMap[p.id] = p.full_name);
+  let html = '';
+  for (const order of orders) {
+    const { data: items } = await sb.from('order_items').select('*, menu_items(name_ar,name_en)').eq('order_id', order.id);
+    const isPending = order.status === 'pending';
+    html += `
+    <div class="waiter-card">
+      ${isPending ? `<div class="new-order-badge">🔔 ${t('طلب جديد','NEW ORDER')}</div>` : ''}
+      <div class="waiter-card-header">
+        <div class="customer-name">👤 ${profileMap[order.customer_id] || t('زبون','Customer')}</div>
+        <div class="order-meta">#${order.id.slice(0,8).toUpperCase()} · ${new Date(order.created_at).toLocaleTimeString(currentLang==='ar'?'ar-IQ':'en-US')}</div>
+      </div>
+      <div class="order-items-list">
+        ${(items||[]).map(i => `
+          <div class="oi-row">
+            <span class="oi-name">${currentLang==='ar'?i.menu_items.name_ar:i.menu_items.name_en}</span>
+            <span class="oi-qty">×${i.quantity}</span>
+            <span class="oi-price">${i.price*i.quantity} IQD</span>
+          </div>`).join('')}
+      </div>
+      <div class="order-total-row">
+        <span>${t('المجموع','Total')}</span>
+        <strong style="color:var(--gold);font-size:18px">${order.total} IQD</strong>
+      </div>
+      <div class="order-actions">
+        ${isPending ? `
+          <button class="btn-sm btn-accept" onclick="updateOrderStatus('${order.id}','accepted')">✅ ${t('قبول','Accept')}</button>
+          <button class="btn-sm btn-reject" onclick="updateOrderStatus('${order.id}','rejected')">❌ ${t('رفض','Reject')}</button>
+        ` : `
+          <button class="btn-sm btn-accept" onclick="updateOrderStatus('${order.id}','delivered')">🚀 ${t('تسليم','Deliver')}</button>
+        `}
+        <button class="btn-sm btn-chat" onclick="openChat('${order.id}','${profileMap[order.customer_id]||'Customer'}')">💬 ${t('مراسلة','Chat')}</button>
+      </div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+async function updateOrderStatus(orderId, status) {
+  const { error } = await sb.from('orders').update({ status, waiter_id: currentUser.id }).eq('id', orderId);
+  if (error) { showToast(t('حدث خطأ','Error') + ': ' + error.message, 'error'); return; }
+  showToast(t('تم تحديث حالة الطلب','Order status updated'), 'success');
+  loadWaiterOrders();
+}
+
+function subscribeWaiterOrders() {
+  waiterOrdersChannel = sb.channel('orders-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      loadWaiterOrders();
+    })
+    .subscribe();
+}
+
+// ===== CHAT =====
+function openChat(orderId, partnerName) {
+  activeChatOrderId = orderId;
+  document.getElementById('chatTitle').textContent = `💬 ${partnerName}`;
+  document.getElementById('chatModal').classList.add('open');
+  loadMessages(orderId);
+  subscribeChat(orderId);
+  updateChatPlaceholder();
+}
+
+function closeChat() {
+  document.getElementById('chatModal').classList.remove('open');
+  activeChatOrderId = null;
+  if (chatChannel) { sb.removeChannel(chatChannel); chatChannel = null; }
+}
+
+async function loadMessages(orderId) {
+  const { data } = await sb.from('messages').select('*, profiles(full_name)').eq('order_id', orderId).order('created_at');
+  renderMessages(data || []);
+}
+
+function renderMessages(msgs) {
+  const container = document.getElementById('chatMessages');
+  if (!msgs.length) {
+    container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">${t('لا توجد رسائل بعد','No messages yet')}</div>`;
+    return;
+  }
+  container.innerHTML = msgs.map(m => {
+    const isMine = m.sender_id === currentUser.id;
+    const time = new Date(m.created_at).toLocaleTimeString(currentLang==='ar'?'ar-IQ':'en-US', {hour:'2-digit',minute:'2-digit'});
+    return `<div class="msg ${isMine?'mine':'theirs'}">
+      ${m.content}
+      <div class="msg-time">${m.profiles?.full_name || ''} · ${time}</div>
+    </div>`;
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const content = input.value.trim();
+  if (!content || !activeChatOrderId) return;
+  input.value = '';
+  // أضف الرسالة فوراً للواجهة قبل ما تروح للسيرفر
+  const container = document.getElementById('chatMessages');
+  const now = new Date();
+  const time = now.toLocaleTimeString(currentLang==='ar'?'ar-IQ':'en-US', {hour:'2-digit',minute:'2-digit'});
+  const tempDiv = document.createElement('div');
+  tempDiv.className = 'msg mine';
+  tempDiv.innerHTML = `${content}<div class="msg-time">${currentProfile?.full_name || ''} · ${time}</div>`;
+  container.appendChild(tempDiv);
+  container.scrollTop = container.scrollHeight;
+  // أرسل للسيرفر
+  await sb.from('messages').insert({ order_id: activeChatOrderId, sender_id: currentUser.id, content });
+}
+
+function subscribeChat(orderId) {
+  if (chatChannel) sb.removeChannel(chatChannel);
+  chatChannel = sb.channel(`chat-${orderId}`)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}` }, (payload) => {
+      // إذا الرسالة من شخص آخر فقط نحدّث (رسائلنا تضاف فوراً)
+      if (payload.new && payload.new.sender_id !== currentUser?.id) {
+        loadMessages(orderId);
+      }
+    })
+    .subscribe();
+}
+
+// ===== WAITER CODE SYSTEM =====
+// كود المدير الخاص — من يدخله يصبح مديراً
+const ADMIN_CODE = 'LOKI99';
+
+// الأكواد الخمسون الأولى للنادلين (6 أرقام عشوائية)
+const INITIAL_WAITER_CODES = [
+  '482715','937264','105843','726391','358024',
+  '619483','274150','831647','492038','567294',
+  '143876','729054','385612','906427','251738',
+  '674903','138265','502947','867134','329750',
+  '415823','780362','946175','263489','578031',
+  '832604','197345','654028','371946','089253',
+  '724519','463087','918345','235671','807432',
+  '156924','392708','741263','628095','479316',
+  '053187','916742','387254','742918','205836',
+  '861497','534702','279163','698041','347852'
+];
+
+let pendingWaiterRegistration = null;
+
+function openWaiterCodeModal(registrationData) {
+  pendingWaiterRegistration = registrationData;
+  document.getElementById('waiterCodeModal').classList.add('open');
+  document.getElementById('waiterCodeInput').value = '';
+  document.getElementById('waiterCodeInput').focus();
+}
+
+function closeWaiterCodeModal() {
+  document.getElementById('waiterCodeModal').classList.remove('open');
+  pendingWaiterRegistration = null;
+}
+
+async function verifyWaiterCode() {
+  const code = document.getElementById('waiterCodeInput').value.trim().toUpperCase();
+  if (!code) { showToast(t('أدخل الكود','Enter the code'), 'error'); return; }
+
+  // تحقق إذا كود المدير
+  if (code === ADMIN_CODE) {
+    if (pendingWaiterRegistration) {
+      await completeWaiterRegistration(pendingWaiterRegistration, 'admin');
+    }
+    closeWaiterCodeModal();
+    return;
+  }
+
+  // تحقق من الأكواد في Supabase
+  const { data } = await sb.from('waiter_codes').select('*').eq('code', code).single();
+  if (!data) {
+    showToast(t('الكود غير صحيح','Invalid code'), 'error');
+    return;
+  }
+  if (data.used) {
+    showToast(t('هذا الكود مستخدم مسبقاً','This code is already used'), 'error');
+    return;
+  }
+
+  // الكود صحيح — سجّل وحدّث الكود كمستخدم
+  await sb.from('waiter_codes').update({ used: true }).eq('code', code);
+  if (pendingWaiterRegistration) {
+    await completeWaiterRegistration(pendingWaiterRegistration, 'waiter');
+  }
+  closeWaiterCodeModal();
+}
+
+async function completeWaiterRegistration(regData, role) {
+  const { data, error } = await sb.auth.signUp({ email: regData.email, password: regData.pass });
+  if (error) { showToast(error.message, 'error'); return; }
+  if (data.user) {
+    await sb.from('profiles').upsert({ id: data.user.id, full_name: regData.name, role, language: currentLang });
+    if (role === 'admin') {
+      showToast(t('✅ تم إنشاء حساب المدير!','✅ Admin account created!'), 'success');
+    } else {
+      showToast(t('✅ تم إنشاء حساب النادل! تحقق من إيميلك','✅ Waiter account created! Check your email'), 'success');
+    }
+  }
+}
+
+// ===== ADMIN FUNCTIONS =====
+async function initWaiterCodes() {
+  const { data } = await sb.from('waiter_codes').select('id').limit(1);
+  if (!data || data.length === 0) {
+    const rows = INITIAL_WAITER_CODES.map(c => ({ code: c, used: false }));
+    await sb.from('waiter_codes').insert(rows);
+  }
+}
+
+// ===== ADMIN TABS =====
+function switchAdminTab(tab, el) {
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  ['codes','waiters','orders','promo','menu','itemdiscount'].forEach(t => {
+    const el2 = document.getElementById('adminTab-'+t);
+    if (el2) el2.style.display = (t === tab) ? 'block' : 'none';
+  });
+  if (tab === 'codes') loadAdminCodes();
+  if (tab === 'waiters') loadWaiterStats();
+  if (tab === 'orders') loadOrderStats();
+  if (tab === 'promo') loadPromoCodes();
+  if (tab === 'menu') loadAdminMenuItems();
+  if (tab === 'itemdiscount') loadItemDiscountList();
+}
+
+// ===== CODES TAB =====
+async function loadAdminCodes() {
+  const { data } = await sb.from('waiter_codes').select('*').order('created_at', { ascending: false });
+  const grid = document.getElementById('adminCodesGrid');
+  if (!data || !data.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-text">${t('لا توجد أكواد','No codes')}</div></div>`;
+    return;
+  }
+  grid.innerHTML = data.map(c => `
+    <div class="code-card" style="flex-direction:column;align-items:flex-start;gap:10px;">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+        <div class="code-value">${c.code}</div>
+        <span class="code-status ${c.used ? 'code-used' : 'code-available'}">
+          <span data-ar="${c.used ? 'مستخدم' : 'متاح'}" data-en="${c.used ? 'Used' : 'Available'}">${c.used ? 'مستخدم' : 'متاح'}</span>
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;width:100%;">
+        <input class="code-name-input" id="name-${c.id}" data-ar-placeholder="اسم النادل" data-en-placeholder="Waiter name" placeholder="اسم النادل" value="${c.waiter_name||''}" maxlength="30">
+        <button class="btn-save-name" onclick="saveCodeName('${c.id}')"><span data-ar="حفظ" data-en="Save">حفظ</span></button>
+      </div>
+      ${c.waiter_name ? `<div style="font-size:12px;color:var(--gold)">👤 ${c.waiter_name}</div>` : ''}
+    </div>`).join('');
+  setLang(currentLang);
+}
+
+async function saveCodeName(id) {
+  const input = document.getElementById('name-'+id);
+  const name = input.value.trim();
+  if (!name) { showToast(t('أدخل الاسم','Enter a name'), 'error'); return; }
+  const { error } = await sb.from('waiter_codes').update({ waiter_name: name }).eq('id', id);
+  if (error) { showToast(error.message, 'error'); return; }
+  showToast(t('✅ تم حفظ الاسم','✅ Name saved'), 'success');
+  loadAdminCodes();
+}
+
+async function generateCodes() {
+  const newCodes = [];
+  for (let i = 0; i < 10; i++) {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    newCodes.push({ code, used: false });
+  }
+  await sb.from('waiter_codes').insert(newCodes);
+  showToast(t('✅ تم إنشاء 10 أكواد جديدة','✅ 10 new codes generated'), 'success');
+  loadAdminCodes();
+}
+
+// ===== WAITER STATS TAB =====
+async function loadWaiterStats() {
+  const container = document.getElementById('waiterStatsList');
+  container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px">${t('جاري التحميل...','Loading...')}</div>`;
+
+  // جلب كل النادلين
+  const { data: waiters } = await sb.from('profiles').select('*').eq('role','waiter');
+  if (!waiters || !waiters.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-text">${t('لا يوجد نادلون','No waiters found')}</div></div>`;
+    return;
+  }
+
+  // جلب كل الطلبات مع waiter_id
+  const { data: orders } = await sb.from('orders').select('id, status, waiter_id, customer_id, total, created_at');
+
+  // جلب كل الرسائل
+  const { data: messages } = await sb.from('messages').select('*, profiles(full_name, role)').order('created_at');
+
+  const allOrders = orders || [];
+  const hasWaiterField = allOrders.some(o => o.waiter_id !== undefined && o.waiter_id !== null);
+
+  container.innerHTML = waiters.map(w => {
+    // طلبات هذا النادل بالـ waiter_id، أو كل الطلبات إذا ما في waiter_id
+    const wOrders = hasWaiterField
+      ? allOrders.filter(o => o.waiter_id === w.id)
+      : allOrders;
+
+    const accepted = wOrders.filter(o => o.status === 'accepted').length;
+    const rejected = wOrders.filter(o => o.status === 'rejected').length;
+    const pending  = wOrders.filter(o => o.status === 'pending').length;
+
+    // المحادثات اللي شارك فيها هذا النادل
+    const allMsgs = messages || [];
+    const waiterOrderIds = [...new Set(allMsgs.filter(m => m.sender_id === w.id).map(m => m.order_id))];
+    const orderIds = waiterOrderIds.length > 0
+      ? waiterOrderIds
+      : [...new Set(allMsgs.map(m => m.order_id))];
+
+    return `
+    <div class="waiter-stat-card">
+      <div class="waiter-stat-header" onclick="toggleWaiterDetail('${w.id}')">
+        <div>
+          <div class="waiter-stat-name">🧑‍🍳 ${w.full_name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${w.email||''}</div>
+        </div>
+        <div class="waiter-stat-badges">
+          <span class="badge-accepted">✅ ${t('مقبول','Accepted')}: ${accepted}</span>
+          <span class="badge-rejected">❌ ${t('مرفوض','Rejected')}: ${rejected}</span>
+          <span class="badge-pending">⏳ ${t('انتظار','Pending')}: ${pending}</span>
+          <span style="color:var(--muted);font-size:18px" id="arrow-${w.id}">▼</span>
+        </div>
+      </div>
+      <div class="waiter-stat-body" id="detail-${w.id}">
+        <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:12px">
+          💬 ${t('المراسلات','Conversations')} (${orderIds.length})
+        </div>
+        ${orderIds.length === 0 ? `<div style="color:var(--muted);font-size:13px">${t('لا توجد مراسلات','No conversations')}</div>` :
+          orderIds.map(oid => {
+            const msgs = allMsgs.filter(m => m.order_id === oid);
+            return `
+            <div class="chat-preview-card">
+              <div class="chat-preview-header">
+                <span>📋 ${t('طلب','Order')} #${oid.slice(-6)}</span>
+                <span>${msgs.length} ${t('رسالة','msg')}</span>
+              </div>
+              <div class="chat-preview-msgs">
+                ${msgs.slice(-4).map(m => {
+                  const isWaiter = m.profiles?.role === 'waiter';
+                  const senderName = m.profiles?.full_name || '—';
+                  const senderLabel = isWaiter
+                    ? `🧑‍🍳 ${senderName}`
+                    : `👤 ${t('زبون','Customer')}: ${senderName}`;
+                  return `<div class="chat-preview-msg ${isWaiter ? 'from-waiter' : 'from-customer'}">
+                    <div style="font-size:10px;font-weight:700;color:${isWaiter ? 'var(--gold)' : 'var(--green)'};margin-bottom:3px;">${senderLabel}</div>
+                    <div>${m.content}</div>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>`;
+          }).join('')
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWaiterDetail(id) {
+  const body = document.getElementById('detail-'+id);
+  const arrow = document.getElementById('arrow-'+id);
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+// ===== ORDER STATS TAB =====
+async function loadOrderStats() {
+  const grid = document.getElementById('orderStatsGrid');
+  grid.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px;grid-column:1/-1">${t('جاري التحميل...','Loading...')}</div>`;
+
+  const { data: orders } = await sb.from('orders').select('*');
+  if (!orders) { grid.innerHTML = ''; return; }
+
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const monthStr = now.toISOString().slice(0,7);
+
+  const todayOrders = orders.filter(o => o.created_at?.slice(0,10) === todayStr);
+  const monthOrders = orders.filter(o => o.created_at?.slice(0,7) === monthStr);
+
+  const totalRevenue = orders.reduce((s,o) => s + (o.total||0), 0);
+  const todayRevenue = todayOrders.reduce((s,o) => s + (o.total||0), 0);
+  const monthRevenue = monthOrders.reduce((s,o) => s + (o.total||0), 0);
+
+  const fmt = n => n.toLocaleString() + ' IQD';
+
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${todayOrders.length}</div>
+      <div class="stat-label">${t('طلبات اليوم','Today Orders')}</div>
+      <div class="stat-sub">${fmt(todayRevenue)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${monthOrders.length}</div>
+      <div class="stat-label">${t('طلبات الشهر','This Month')}</div>
+      <div class="stat-sub">${fmt(monthRevenue)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${orders.length}</div>
+      <div class="stat-label">${t('إجمالي الطلبات','Total Orders')}</div>
+      <div class="stat-sub">${fmt(totalRevenue)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${orders.filter(o=>o.status==='accepted').length}</div>
+      <div class="stat-label">${t('مقبولة','Accepted')}</div>
+      <div class="stat-sub" style="color:var(--green)">${t('طلب مكتمل','Completed orders')}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${orders.filter(o=>o.status==='rejected').length}</div>
+      <div class="stat-label">${t('مرفوضة','Rejected')}</div>
+      <div class="stat-sub" style="color:var(--red)">${t('طلب ملغي','Cancelled orders')}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${orders.filter(o=>o.status==='pending').length}</div>
+      <div class="stat-label">${t('قيد الانتظار','Pending')}</div>
+      <div class="stat-sub" style="color:var(--gold)">${t('بانتظار النادل','Awaiting waiter')}</div>
+    </div>
+  `;
+}
+
+function showAdminPage() {
+  showPage('admin-page');
+  loadAdminCodes();
+}
+
+// ===== SEARCH =====
+function searchMenu(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    filterMenu(currentFilter, document.querySelector('.cat-btn.active') || document.querySelector('.cat-btn'));
+    return;
+  }
+  const filtered = allMenuItems.filter(i =>
+    i.name_ar.toLowerCase().includes(q) ||
+    i.name_en.toLowerCase().includes(q) ||
+    (i.category_ar && i.category_ar.toLowerCase().includes(q)) ||
+    (i.category_en && i.category_en.toLowerCase().includes(q))
+  );
+  renderMenu(filtered);
+}
+
+
+// ============================================================
+// ===== PROFILE PAGE =====
+// ============================================================
+let _prevPage = null;
+
+function showAddressRequiredModal() {
+  const old = document.getElementById('addressRequiredModal');
+  if (old) old.remove();
+  const modal = document.createElement('div');
+  modal.id = 'addressRequiredModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border);border-radius:24px;width:min(380px,100%);padding:32px;text-align:center;">
+      <div style="font-size:52px;margin-bottom:16px;">📍</div>
+      <div style="font-size:20px;font-weight:800;color:var(--gold);margin-bottom:10px;">${t('العنوان مطلوب','Address Required')}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.8;">${t('لازم تضيف عنوانك بالملف الشخصي قبل ما تطلب، حتى يوصلك طلبك صح.','Please add your address in your profile before placing an order.')}</div>
+      <div style="display:flex;gap:12px;">
+        <button onclick="document.getElementById('addressRequiredModal').remove()"
+          style="flex:1;padding:14px;background:var(--dark3);color:var(--muted);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;">
+          ${t('إلغاء','Cancel')}
+        </button>
+        <button onclick="document.getElementById('addressRequiredModal').remove();showProfilePage(true)"
+          style="flex:1;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:12px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;">
+          ${t('← أضف عنوانك','Add Address →')}
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function showProfilePage(focusLocation = false) {
+  // تحديث زر المود
+  const isLight = document.body.classList.contains("light-mode");
+  const icon = document.getElementById("themeModeIcon");
+  const label = document.getElementById("themeModeLabel");
+  if (icon) icon.textContent = isLight ? "🌙" : "☀️";
+  if (label) {
+    label.textContent = currentLang === "ar" ? (isLight ? "مود الليل" : "مود النهار") : (isLight ? "Dark Mode" : "Light Mode");
+  }
+  // احفظ الصفحة الحالية للرجوع إليها
+  const active = document.querySelector('.page.active');
+  _prevPage = active ? active.id : null;
+
+  // حشو البيانات
+  const p = currentProfile;
+  if (!p) return;
+
+  document.getElementById('profileDisplayName').textContent = p.full_name || '—';
+  document.getElementById('profileDisplayEmail').textContent = currentUser?.email || '—';
+  document.getElementById('profileNameInput').value = p.full_name || '';
+  document.getElementById('profileEmailInput').value = currentUser?.email || '';
+  document.getElementById('profilePhoneInput').value = p.phone || '';
+  document.getElementById('profileLocationInput').value = p.location || '';
+  document.getElementById('profileLinkInput').value = p.website || '';
+
+  // الصورة
+  const img = document.getElementById('profileAvatarImg');
+  const ph = document.getElementById('profileAvatarPlaceholder');
+  if (p.avatar_url) {
+    img.src = p.avatar_url;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'flex';
+  }
+
+  // نوع الحساب
+  const badge = document.getElementById('profileRoleBadge');
+  const roleMap = {
+    customer: { ar:'🍽️ زبون', en:'🍽️ Customer', cls:'role-customer' },
+    waiter:   { ar:'🧑‍🍳 نادل', en:'🧑‍🍳 Waiter',   cls:'role-waiter' },
+    admin:    { ar:'👑 مدير', en:'👑 Admin',    cls:'role-admin' }
+  };
+  const rm = roleMap[p.role] || roleMap.customer;
+  badge.textContent = currentLang === 'ar' ? rm.ar : rm.en;
+  badge.className = 'profile-role-badge ' + rm.cls;
+
+  showPage('profile-page');
+  setLang(currentLang);
+
+  // إذا طُلب التركيز على خانة العنوان
+  if (focusLocation) {
+    setTimeout(() => {
+      const locInput = document.getElementById('profileLocationInput');
+      if (locInput) {
+        locInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        locInput.focus();
+        locInput.style.borderColor = 'var(--gold)';
+        locInput.style.boxShadow = '0 0 0 3px rgba(212,175,55,0.25)';
+        setTimeout(() => {
+          locInput.style.borderColor = '';
+          locInput.style.boxShadow = '';
+        }, 2500);
+      }
+    }, 350);
+  }
+}
+
+function goBackFromProfile() {
+  if (_prevPage) showPage(_prevPage);
+  else {
+    const r = currentProfile?.role;
+    if (r === 'admin') showPage('admin-page');
+    else if (r === 'waiter') showPage('waiter-page');
+    else showPage('customer-page');
+  }
+}
+
+async function saveProfile() {
+  const name  = document.getElementById('profileNameInput').value.trim();
+  const email = document.getElementById('profileEmailInput').value.trim();
+  const phone = document.getElementById('profilePhoneInput').value.trim();
+  const loc   = document.getElementById('profileLocationInput').value.trim();
+  const link  = document.getElementById('profileLinkInput').value.trim();
+
+  if (!name) { showToast(t('أدخل الاسم','Enter name'), 'error'); return; }
+
+  // تحديث profiles
+  const { error: pe } = await sb.from('profiles').update({
+    full_name: name,
+    phone: phone || null,
+    location: loc || null,
+    website: link || null
+  }).eq('id', currentUser.id);
+  if (pe) { showToast(pe.message, 'error'); return; }
+
+  // تحديث الإيميل إذا تغيّر
+  if (email && email !== currentUser.email) {
+    const { error: ae } = await sb.auth.updateUser({ email });
+    if (ae) { showToast(ae.message, 'error'); return; }
+    showToast(t('📧 تحقق من إيميلك الجديد لتأكيد التغيير','📧 Check your new email to confirm change'), 'info');
+  }
+
+  currentProfile.full_name = name;
+  currentProfile.phone = phone;
+  currentProfile.location = loc;
+  currentProfile.website = link;
+
+  document.getElementById('profileDisplayName').textContent = name;
+  showToast(t('✅ تم حفظ التغييرات','✅ Changes saved'), 'success');
+}
+
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast(t('الصورة كبيرة جداً (أقصى 2MB)','Image too large (max 2MB)'), 'error'); return; }
+
+  showToast(t('⏳ جاري رفع الصورة...','⏳ Uploading...'), 'info');
+  const ext = file.name.split('.').pop();
+  const path = `avatars/${currentUser.id}.${ext}`;
+
+  const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+  if (upErr) { showToast(upErr.message, 'error'); return; }
+
+  const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
+  const url = urlData.publicUrl + '?t=' + Date.now();
+
+  await sb.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+  currentProfile.avatar_url = url;
+
+  const img = document.getElementById('profileAvatarImg');
+  img.src = url;
+  img.style.display = 'block';
+  document.getElementById('profileAvatarPlaceholder').style.display = 'none';
+  showToast(t('✅ تم تحديث الصورة','✅ Photo updated'), 'success');
+}
+
+async function logoutFromProfile() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  cart = [];
+  if (waiterOrdersChannel) sb.removeChannel(waiterOrdersChannel);
+  // إعادة إظهار صفحة الهبوط
+  const landingEl = document.getElementById('landing');
+  if (landingEl) landingEl.style.display = '';
+  showPage('landing');
+  showToast(t('تم تسجيل الخروج','Logged out'), 'info');
+}
+
+async function deleteAccount() {
+  const confirm1 = window.confirm(t(
+    'هل أنت متأكد من حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.',
+    'Are you sure you want to delete your account? This cannot be undone.'
+  ));
+  if (!confirm1) return;
+
+  // حذف البروفايل من قاعدة البيانات
+  await sb.from('profiles').delete().eq('id', currentUser.id);
+  // تسجيل خروج
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  cart = [];
+  showPage('landing');
+  showToast(t('تم حذف الحساب','Account deleted'), 'info');
+}
+
+
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== LOADER =====
+async function initApp() {
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
+
+  const fill = document.getElementById('loaderFill');
+  fill.style.width = '30%';
+  setTimeout(() => fill.style.width = '70%', 300);
+  const { data: { user } } = await sb.auth.getUser();
+  fill.style.width = '100%';
+  await new Promise(r => setTimeout(r, 500));
+  document.getElementById('loader').style.display = 'none';
+  await initWaiterCodes();
+  if (user) await loadProfile(user);
+  else showPage('landing');
+  setLang('ar');
+}
+
+initApp();
+
+// ============================================================
+// ===== PROMO CODES SYSTEM =====
+// ============================================================
+let appliedPromo = null;
+
+async function applyPromoCode() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  const statusEl = document.getElementById('promoStatus');
+  const input = document.getElementById('promoInput');
+
+  if (!code) { showToast(t('أدخل كود الخصم','Enter promo code'), 'error'); return; }
+
+  // تحقق من الكود في قاعدة البيانات
+  const { data } = await sb.from('promo_codes').select('*').eq('code', code).single();
+
+  if (!data) {
+    input.classList.remove('valid'); input.classList.add('invalid');
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = t('❌ الكود غير صحيح','❌ Invalid promo code');
+    appliedPromo = null;
+    updateCartTotal();
+    return;
+  }
+
+  if (!data.active) {
+    input.classList.remove('valid'); input.classList.add('invalid');
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = t('❌ هذا الكود منتهي الصلاحية','❌ This code has expired');
+    appliedPromo = null;
+    updateCartTotal();
+    return;
+  }
+
+  // كود صحيح ✅
+  input.classList.remove('invalid'); input.classList.add('valid');
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--green)';
+  statusEl.textContent = t(`✅ تم تطبيق خصم ${data.discount}%`, `✅ ${data.discount}% discount applied!`);
+  appliedPromo = data;
+  updateCartTotal();
+}
+
+function updateCartTotal() {
+  const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const totalEl = document.getElementById('cartTotal');
+  const discRow = document.getElementById('promoDiscountRow');
+  const finalRow = document.getElementById('promoFinalRow');
+  const discAmt = document.getElementById('promoDiscountAmt');
+  const finalAmt = document.getElementById('promoFinalAmt');
+
+  if (appliedPromo && appliedPromo.active) {
+    const discountAmt = Math.round(subtotal * appliedPromo.discount / 100);
+    const finalTotal = subtotal - discountAmt;
+    totalEl.textContent = subtotal.toLocaleString() + ' IQD';
+    discAmt.textContent = '- ' + discountAmt.toLocaleString() + ' IQD';
+    finalAmt.textContent = finalTotal.toLocaleString() + ' IQD';
+    discRow.style.display = 'flex';
+    finalRow.style.display = 'flex';
+  } else {
+    totalEl.textContent = subtotal.toLocaleString() + ' IQD';
+    discRow.style.display = 'none';
+    finalRow.style.display = 'none';
+  }
+}
+
+function resetPromo() {
+  appliedPromo = null;
+  const input = document.getElementById('promoInput');
+  if (input) { input.value = ''; input.classList.remove('valid','invalid'); }
+  const statusEl = document.getElementById('promoStatus');
+  if (statusEl) statusEl.style.display = 'none';
+  const discRow = document.getElementById('promoDiscountRow');
+  const finalRow = document.getElementById('promoFinalRow');
+  if (discRow) discRow.style.display = 'none';
+  if (finalRow) finalRow.style.display = 'none';
+}
+
+
+// ===== ADMIN PROMO CODES =====
+async function loadPromoCodes() {
+  const { data } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
+  const container = document.getElementById('promoCodesList');
+  if (!container) return;
+  if (!data || !data.length) {
+    container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px">${t('لا توجد أكواد خصم','No promo codes')}</div>`;
+    return;
+  }
+  const now = new Date();
+  container.innerHTML = data.map(p => {
+    const expired = p.expires_at && new Date(p.expires_at) < now;
+    const maxReached = p.max_uses > 0 && p.uses_count >= p.max_uses;
+    const isActive = p.active && !expired && !maxReached;
+    const statusColor = isActive ? 'var(--green)' : 'var(--red)';
+    const statusText = expired ? '⏰ '+t('منتهي الصلاحية','Expired') :
+                       maxReached ? '🔒 '+t('استُنفد','Max reached') :
+                       isActive ? '✅ '+t('فعّال','Active') : '❌ '+t('معطّل','Inactive');
+    return `
+    <div style="background:var(--dark3);border:1px solid ${isActive?'rgba(212,175,55,0.4)':'var(--border)'};border-radius:16px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--gold)">${p.code}</div>
+          <div style="font-size:13px;margin-top:4px;">🏷️ ${t('خصم','Discount')}: <span style="color:var(--gold);font-weight:800;">${p.discount}%</span></div>
+          ${p.description ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">📝 ${p.description}</div>` : ''}
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+            <div style="font-size:12px;color:var(--muted);">🔢 ${t('الاستخدام','Uses')}: <span style="color:var(--text);font-weight:700;">${p.uses_count||0}${p.max_uses>0?' / '+p.max_uses:' / ∞'}</span></div>
+            ${p.expires_at ? `<div style="font-size:12px;color:var(--muted);">📅 ${t('ينتهي','Expires')}: <span style="color:${expired?'var(--red)':'var(--text)'};font-weight:700;">${new Date(p.expires_at).toLocaleDateString('ar-IQ')}</span></div>` : ''}
+          </div>
+          <div style="font-size:11px;color:${statusColor};margin-top:6px;font-weight:700;">${statusText}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button onclick="togglePromoCode('${p.id}',${p.active})" style="background:${p.active?'rgba(192,57,43,0.2)':'rgba(39,174,96,0.2)'};color:${p.active?'var(--red)':'var(--green)'};border:1px solid ${p.active?'var(--red)':'var(--green)'};border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">
+            ${p.active ? t('⛔ تعطيل','⛔ Disable') : t('✅ تفعيل','✅ Enable')}
+          </button>
+          <button onclick="deletePromoCode('${p.id}')" style="background:rgba(192,57,43,0.15);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">🗑️ ${t('حذف','Delete')}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function createPromoCode() {
+  const code = document.getElementById('newPromoCode').value.trim().toUpperCase();
+  const discount = parseInt(document.getElementById('newPromoDiscount').value);
+  const description = document.getElementById('newPromoDesc').value.trim();
+  const max_uses = parseInt(document.getElementById('newPromoMaxUses').value) || 0;
+  const expiryVal = document.getElementById('newPromoExpiry').value;
+  const expires_at = expiryVal ? new Date(expiryVal).toISOString() : null;
+  if (!code) { showToast(t('أدخل الكود','Enter code'), 'error'); return; }
+  if (!discount || discount < 1 || discount > 100) { showToast(t('أدخل نسبة صحيحة 1-100','Enter valid % 1-100'), 'error'); return; }
+  const { error } = await sb.from('promo_codes').insert({ code, discount, description, active: true, max_uses, uses_count: 0, expires_at });
+  if (error) {
+    if (error.code === '23505') showToast(t('هذا الكود موجود مسبقاً','Code already exists'), 'error');
+    else showToast(error.message, 'error');
+    return;
+  }
+  showToast(t(`✅ تم إنشاء كود ${code}`,`✅ Code ${code} created`), 'success');
+  document.getElementById('newPromoCode').value = '';
+  document.getElementById('newPromoDiscount').value = '';
+  document.getElementById('newPromoDesc').value = '';
+  document.getElementById('newPromoMaxUses').value = '0';
+  document.getElementById('newPromoExpiry').value = '';
+  loadPromoCodes();
+}
+
+async function togglePromoCode(id, currentActive) {
+  await sb.from('promo_codes').update({ active: !currentActive }).eq('id', id);
+  loadPromoCodes();
+}
+
+async function deletePromoCode(id) {
+  await sb.from('promo_codes').delete().eq('id', id);
+  showToast(t('تم حذف الكود','Code deleted'), 'success');
+  loadPromoCodes();
+}
+
+// ============================================================
+// ===== MENU MANAGEMENT (ADMIN) =====
+// ============================================================
+
+function previewNewItemImage() {
+  const url = document.getElementById('newItemImage').value.trim();
+  const wrap = document.getElementById('newItemImagePreview');
+  const img = document.getElementById('newItemPreviewImg');
+  if (!url) { showToast(t('أدخل رابط الصورة أولاً','Enter image URL first'), 'error'); return; }
+  img.src = url;
+  wrap.style.display = 'block';
+  img.onerror = () => { showToast(t('رابط الصورة غير صحيح','Invalid image URL'), 'error'); wrap.style.display = 'none'; };
+}
+
+async function addNewMenuItem() {
+  const name_ar = document.getElementById('newItemNameAr').value.trim();
+  const name_en = document.getElementById('newItemNameEn').value.trim();
+  const category_ar = document.getElementById('newItemCatAr').value.trim();
+  const category_en = document.getElementById('newItemCatEn').value.trim();
+  const price = parseInt(document.getElementById('newItemPrice').value);
+  const image_url = document.getElementById('newItemImage').value.trim();
+
+  if (!name_ar || !name_en) { showToast(t('أدخل اسم الوجبة','Enter item name'), 'error'); return; }
+  if (!category_ar || !category_en) { showToast(t('أدخل الفئة','Enter category'), 'error'); return; }
+  if (!price || price < 1) { showToast(t('أدخل سعراً صحيحاً','Enter valid price'), 'error'); return; }
+
+  const { error } = await sb.from('menu_items').insert({
+    name_ar, name_en, category_ar, category_en,
+    price, image_url: image_url || null, available: true, discount: 0
+  });
+
+  if (error) { showToast(t('خطأ: ','Error: ') + error.message, 'error'); return; }
+
+  showToast(t(`✅ تمت إضافة ${name_ar}`, `✅ Added ${name_en}`), 'success');
+  // تفريغ الحقول
+  ['newItemNameAr','newItemNameEn','newItemCatAr','newItemCatEn','newItemPrice','newItemImage'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('newItemImagePreview').style.display = 'none';
+  loadAdminMenuItems();
+  // تحديث المنيو للزبون
+  loadMenu();
+}
+
+async function loadAdminMenuItems() {
+  const { data } = await sb.from('menu_items').select('*').order('name_ar', { ascending: true });
+  const list = document.getElementById('adminMenuItemsList');
+  if (!data || !data.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:14px;text-align:center;padding:20px;">${t('لا توجد وجبات مضافة','No items added yet')}</div>`;
+    return;
+  }
+  list.innerHTML = data.map(item => `
+    <div style="background:var(--dark4);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;">
+        ${item.image_url ? `<img src="${item.image_url}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:56px;height:56px;border-radius:10px;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🍽️</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;">${item.name_ar}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${item.name_en}</div>
+          <div style="font-size:12px;color:var(--gold);margin-top:2px;">${item.category_ar} · <strong>${item.price.toLocaleString()} IQD</strong></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button onclick="toggleMenuItemAvailable('${item.id}',${item.available})"
+            style="padding:5px 10px;border-radius:8px;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;
+            background:${item.available ? 'rgba(39,174,96,0.2)' : 'rgba(192,57,43,0.2)'};
+            color:${item.available ? 'var(--green)' : 'var(--red)'};">
+            ${item.available ? '✅ متاح' : '🚫 مخفي'}
+          </button>
+          <button onclick="openEditMenuItem('${item.id}')"
+            style="padding:5px 10px;border-radius:8px;border:1px solid var(--gold);background:rgba(212,175,55,0.1);color:var(--gold);cursor:pointer;font-size:11px;font-family:inherit;font-weight:700;">
+            ✏️ تعديل
+          </button>
+          <button onclick="deleteMenuItem('${item.id}')"
+            style="padding:5px 10px;border-radius:8px;border:1px solid var(--red);background:rgba(192,57,43,0.1);color:var(--red);cursor:pointer;font-size:11px;font-family:inherit;">
+            🗑️
+          </button>
+        </div>
+      </div>
+      <!-- حقول التعديل (مخفية افتراضياً) -->
+      <div id="editForm-${item.id}" style="display:none;padding:12px;border-top:1px solid var(--border);background:var(--dark3);display:none;">
+        <div style="display:grid;gap:8px;">
+          <input id="edit-nameAr-${item.id}" class="form-input" value="${item.name_ar}" placeholder="الاسم بالعربي" style="font-size:13px;">
+          <input id="edit-nameEn-${item.id}" class="form-input" value="${item.name_en}" placeholder="Name in English" style="font-size:13px;">
+          <input id="edit-catAr-${item.id}" class="form-input" value="${item.category_ar||''}" placeholder="الفئة بالعربي" style="font-size:13px;">
+          <input id="edit-catEn-${item.id}" class="form-input" value="${item.category_en||''}" placeholder="Category in English" style="font-size:13px;">
+          <input id="edit-price-${item.id}" class="form-input" type="number" value="${item.price}" placeholder="السعر IQD" style="font-size:13px;color:var(--gold);">
+          <input id="edit-img-${item.id}" class="form-input" value="${item.image_url||''}" placeholder="رابط الصورة" style="font-size:12px;">
+          <div style="display:flex;gap:8px;">
+            <button onclick="saveEditMenuItem('${item.id}')" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;">💾 حفظ</button>
+            <button onclick="closeEditMenuItem('${item.id}')" style="padding:10px 16px;background:var(--dark4);color:var(--muted);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;">إلغاء</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleMenuItemAvailable(id, current) {
+  await sb.from('menu_items').update({ available: !current }).eq('id', id);
+  loadAdminMenuItems();
+  loadMenu();
+}
+
+async function deleteMenuItem(id) {
+  if (!confirm(t('حذف هذه الوجبة نهائياً؟','Delete this item permanently?'))) return;
+  await sb.from('menu_items').delete().eq('id', id);
+  showToast(t('تم الحذف','Deleted'), 'success');
+  loadAdminMenuItems();
+  loadMenu();
+}
+
+// ============================================================
+// ===== ITEM DISCOUNT (ADMIN) =====
+// ============================================================
+
+let _allItemsForDiscount = [];
+
+async function loadItemDiscountList() {
+  const { data } = await sb.from('menu_items').select('*').order('name_ar');
+  _allItemsForDiscount = data || [];
+  renderItemDiscountList(_allItemsForDiscount);
+}
+
+function filterItemDiscountList(q) {
+  const filtered = _allItemsForDiscount.filter(i =>
+    i.name_ar.includes(q) || i.name_en.toLowerCase().includes(q.toLowerCase())
+  );
+  renderItemDiscountList(filtered);
+}
+
+function renderItemDiscountList(items) {
+  const list = document.getElementById('itemDiscountList');
+  if (!items.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:14px;text-align:center;padding:20px;">${t('لا توجد نتائج','No results')}</div>`;
+    return;
+  }
+  list.innerHTML = items.map(item => `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--dark4);border:1px solid var(--border);border-radius:14px;padding:12px;">
+      ${item.image_url ? `<img src="${item.image_url}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:44px;height:44px;border-radius:8px;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🍽️</div>`}
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:13px;">${item.name_ar}</div>
+        <div style="font-size:12px;color:var(--muted);">${item.price} IQD
+          ${item.discount > 0 ? `→ <span style="color:var(--green);font-weight:700;">${Math.round(item.price * (1 - item.discount/100))} IQD</span> <span style="color:var(--green);font-size:11px;">(${item.discount}% خصم)</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <input type="number" id="disc-${item.id}" value="${item.discount || 0}" min="0" max="90" placeholder="0"
+          style="width:56px;padding:7px 8px;background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-family:inherit;font-size:13px;font-weight:700;text-align:center;outline:none;"
+          oninput="this.style.borderColor=this.value>0?'var(--green)':'var(--border)'">
+        <span style="font-size:12px;color:var(--muted);">%</span>
+        <button onclick="saveItemDiscount('${item.id}')"
+          style="padding:7px 12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;">
+          ✓
+        </button>
+        ${item.discount > 0 ? `<button onclick="saveItemDiscountValue('${item.id}',0)"
+          style="padding:7px 10px;background:rgba(192,57,43,0.2);color:var(--red);border:1px solid var(--red);border-radius:8px;cursor:pointer;font-size:12px;">✕</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function saveItemDiscount(id) {
+  const val = parseInt(document.getElementById('disc-'+id)?.value) || 0;
+  await saveItemDiscountValue(id, val);
+}
+
+async function saveItemDiscountValue(id, val) {
+  if (val < 0 || val > 90) { showToast(t('الخصم بين 0 و 90%','Discount must be 0-90%'), 'error'); return; }
+  const { error } = await sb.from('menu_items').update({ discount: val }).eq('id', id);
+  if (error) { showToast(error.message, 'error'); return; }
+  // تحديث محلي
+  const item = _allItemsForDiscount.find(i => i.id === id);
+  if (item) item.discount = val;
+  showToast(val > 0 ? t(`✅ تم تفعيل خصم ${val}%`, `✅ Discount ${val}% applied`) : t('تم إزالة الخصم','Discount removed'), 'success');
+  loadItemDiscountList();
+  loadMenu();
+}
+
+
+// ===== EDIT MENU ITEM =====
+function openEditMenuItem(id) {
+  // إخفاء كل نماذج التعديل المفتوحة
+  document.querySelectorAll('[id^="editForm-"]').forEach(f => f.style.display = 'none');
+  const form = document.getElementById('editForm-' + id);
+  if (form) form.style.display = 'grid';
+}
+
+function closeEditMenuItem(id) {
+  const form = document.getElementById('editForm-' + id);
+  if (form) form.style.display = 'none';
+}
+
+async function saveEditMenuItem(id) {
+  const nameAr = document.getElementById('edit-nameAr-' + id)?.value.trim();
+  const nameEn = document.getElementById('edit-nameEn-' + id)?.value.trim();
+  const catAr  = document.getElementById('edit-catAr-'  + id)?.value.trim();
+  const catEn  = document.getElementById('edit-catEn-'  + id)?.value.trim();
+  const price  = parseFloat(document.getElementById('edit-price-' + id)?.value);
+  const img    = document.getElementById('edit-img-'   + id)?.value.trim();
+
+  if (!nameAr || !nameEn || !price) {
+    showToast(t('أدخل الاسم والسعر على الأقل','Enter name and price at least'), 'error');
+    return;
+  }
+
+  const { error } = await sb.from('menu_items').update({
+    name_ar: nameAr, name_en: nameEn,
+    category_ar: catAr, category_en: catEn,
+    price, image_url: img
+  }).eq('id', id);
+
+  if (error) { showToast(error.message, 'error'); return; }
+  showToast(t('✅ تم تحديث الوجبة','✅ Item updated'), 'success');
+  loadAdminMenuItems();
+  loadMenu();
+}
+
+</script>
+</body>
+</html>
