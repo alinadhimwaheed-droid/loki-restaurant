@@ -2179,6 +2179,12 @@ async function placeOrder() {
     const items = cart.map(i => ({ order_id: order.id, menu_item_id: i.id, quantity: i.qty, price: i.price }));
     const { error: iErr } = await sb.from('order_items').insert(items);
     if (iErr) throw iErr;
+    sendToLoki('new_order', {
+      order_id: order.id,
+      customer: currentProfile?.full_name,
+      total: total,
+      items: cart.map(i => ({ name: i.name_ar, qty: i.qty, price: i.price }))
+    });
     cart = [];
     updateCartBadge();
     resetPromo();
@@ -2300,6 +2306,11 @@ async function updateOrderStatus(orderId, status) {
   if (error) { showToast(t('حدث خطأ','Error') + ': ' + error.message, 'error'); return; }
   showToast(t('تم تحديث حالة الطلب','Order status updated'), 'success');
   loadWaiterOrders();
+  sendToLoki('order_status_changed', {
+    order_id: orderId,
+    new_status: status,
+    waiter: currentProfile?.full_name
+  });
 }
 
 function subscribeWaiterOrders() {
@@ -3344,8 +3355,18 @@ function closeLangDropdown() {
 
 // Close on outside click
 document.addEventListener('click', () => closeLangDropdown());
-
-
+// ===== LOKI VAULT =====
+const LOKI_API_KEY = 'VAULT-NY6TB-L3OO5-34EOP-JKM2K';
+const LOKI_ENDPOINT = 'https://zatboctyiagjvnducxzi.supabase.co/functions/v1/ingest';
+async function sendToLoki(eventName, data) {
+  try {
+    await fetch(LOKI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': LOKI_API_KEY },
+      body: JSON.stringify({ event: eventName, source: 'loki-restaurant', payload: data })
+    });
+  } catch(e) {}
+}
 // ===== INLINE LANG SUBMENU =====
 function toggleLangSub(e) {
   e.stopPropagation();
